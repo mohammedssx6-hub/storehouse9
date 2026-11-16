@@ -11,7 +11,6 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-  <!-- مكتبة html5-qrcode لقراءة الباركود بدقة عالية -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -94,7 +93,6 @@
     .app.layout-top { flex-direction: column; }
     .app.layout-side { flex-direction: row; }
 
-    /* تعديل الشريط العلوي ليكون أوسع وأنظف */
     .sidebar {
       background: var(--sidebar-bg); border-bottom: 1px solid var(--border);
       padding: 8px 12px; display: flex; flex-direction: row; align-items: center; gap: 10px;
@@ -102,16 +100,16 @@
       transition: background .3s;
     }
     .layout-top .sidebar { width: 100%; border-left: none; }
+    
     .layout-side .sidebar {
-      width: 250px; height: 100vh; flex-direction: column; align-items: stretch;
+      width: 260px; height: 100vh; flex-direction: column; align-items: stretch;
       border-left: 1px solid var(--border); border-bottom: none; position: sticky; top: 0;
-      padding: 20px; gap: 20px; flex-shrink: 0;
+      padding: 20px 16px; gap: 20px; flex-shrink: 0; overflow-y: auto;
     }
 
-    /* تصغير الشعار وحذف الكلمة في الجوال */
     .brand { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .brand .logo-svg { width: 28px; height: 28px; } /* أصغر */
-    .brand-name { display: none; } /* مخفية في الشريط العلوي */
+    .brand .logo-svg { width: 28px; height: 28px; }
+    .brand-name { display: none; }
     .layout-side .brand .logo-svg { width: 40px; height: 40px; }
     .layout-side .brand-name { display: block; font-size: 15px; font-weight: 700; color: var(--primary); white-space: nowrap; }
 
@@ -126,11 +124,15 @@
     .nav-link:hover { background: var(--input-bg); }
     .nav-link.active { background: var(--primary); color: #fff; }
 
-    /* حذف صندوق المستخدم من الشريط العلوي (يظهر فقط في الوضع الجانبي) */
     .user-box { display: none; }
-    .layout-side .user-box { display: flex; align-items: center; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
-    .user-box img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--input-bg); }
-    .user-name { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; }
+    .layout-side .user-box { 
+      display: flex; flex-direction: column; gap: 12px; 
+      padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; 
+    }
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    .user-info img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--input-bg); }
+    .user-name { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
+    .user-actions { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
     .btn-link { background: none; border: none; color: var(--danger); cursor: pointer; font-family: inherit; font-size: 12px; padding: 0; }
 
     .theme-toggle {
@@ -185,6 +187,7 @@
     .btn-danger:hover { opacity: .9; }
     .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
     .btn-outline:hover { background: var(--input-bg); }
+    .btn-success { background: var(--success); color: #fff; }
     .btn-sm { padding: 7px 13px; font-size: 13px; }
 
     /* ============ Table ============ */
@@ -287,68 +290,26 @@
     .recent-log .action { font-weight: 600; color: var(--primary); }
     .recent-log .time { color: var(--muted); font-size: 12px; white-space: nowrap; }
 
-    /* ============ Camera Scanner (Small Hole-Punch) ============ */
-    .camera-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 3000;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
+    /* ============ Camera Scanner ============ */
+    .camera-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
     .camera-overlay.hidden { display: none; }
-    
-    /* إطار الكاميرا الصغير */
-    .camera-box {
-      position: relative; width: 85%; max-width: 320px; aspect-ratio: 4/3;
-      border-radius: 20px; overflow: hidden;
-      box-shadow: 0 0 0 9999px rgba(0,0,0,.85), 0 0 30px rgba(0,0,0,.5);
-      background: #000;
-    }
-    /* مكتبة html5-qrcode تضع الفيديو هنا */
-    #reader {
-      width: 100% !important; height: 100% !important;
-      border: none !important;
-    }
-    #reader video {
-      width: 100% !important; height: 100% !important; object-fit: cover;
-    }
-    /* إخفاء عناصر المكتبة الافتراضية */
+    .camera-box { position: relative; width: 85%; max-width: 320px; aspect-ratio: 4/3; border-radius: 20px; overflow: hidden; box-shadow: 0 0 0 9999px rgba(0,0,0,.85), 0 0 30px rgba(0,0,0,.5); background: #000; }
+    #reader { width: 100% !important; height: 100% !important; border: none !important; }
+    #reader video { width: 100% !important; height: 100% !important; object-fit: cover; }
     #reader__dashboard_section_csr { display: none !important; }
     #reader__header_message { display: none !important; }
     #reader__scan_region { border: none !important; }
     #reader__scan_region img { display: none !important; }
     #reader__dashboard { padding: 0 !important; background: transparent !important; }
-
-    /* زوايا الإطار الذهبية */
-    .camera-corner {
-      position: absolute; width: 30px; height: 30px; border: 4px solid var(--accent); z-index: 10;
-    }
+    .camera-corner { position: absolute; width: 30px; height: 30px; border: 4px solid var(--accent); z-index: 10; }
     .camera-corner.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; border-top-left-radius: 12px; }
     .camera-corner.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; border-top-right-radius: 12px; }
     .camera-corner.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; border-bottom-left-radius: 12px; }
     .camera-corner.br { bottom: 10px; right: 10px; border-left: none; border-top: none; border-bottom-right-radius: 12px; }
-    
-    /* خط المسح المتحرك */
-    .camera-scanline {
-      position: absolute; left: 10%; right: 10%; height: 2px;
-      background: var(--accent); box-shadow: 0 0 10px var(--accent);
-      top: 50%; animation: scanline 2s linear infinite; z-index: 10;
-    }
-    @keyframes scanline {
-      0% { top: 15%; }
-      50% { top: 85%; }
-      100% { top: 15%; }
-    }
-
-    .camera-hint {
-      position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
-      color: #fff; text-align: center; font-size: 14px; background: rgba(0,0,0,.6);
-      padding: 8px 16px; border-radius: 20px; white-space: nowrap; z-index: 10;
-    }
-    .camera-close {
-      position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,.25);
-      border: none; color: #fff; width: 48px; height: 48px; border-radius: 50%;
-      font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      z-index: 10; backdrop-filter: blur(4px);
-    }
+    .camera-scanline { position: absolute; left: 10%; right: 10%; height: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); top: 50%; animation: scanline 2s linear infinite; z-index: 10; }
+    @keyframes scanline { 0% { top: 15%; } 50% { top: 85%; } 100% { top: 15%; } }
+    .camera-hint { position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%); color: #fff; text-align: center; font-size: 14px; background: rgba(0,0,0,.6); padding: 8px 16px; border-radius: 20px; white-space: nowrap; z-index: 10; }
+    .camera-close { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,.25); border: none; color: #fff; width: 48px; height: 48px; border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; backdrop-filter: blur(4px); }
 
     /* ============ Settings ============ */
     .settings-group { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -357,28 +318,14 @@
     .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; gap: 12px; flex-wrap: wrap; }
     .setting-row .label { font-size: 14px; }
     .setting-row .desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .setting-toggle {
-      width: 44px; height: 24px; border-radius: 12px; background: var(--border);
-      border: none; cursor: pointer; position: relative; transition: .2s; flex-shrink: 0;
-    }
+    .setting-toggle { width: 44px; height: 24px; border-radius: 12px; background: var(--border); border: none; cursor: pointer; position: relative; transition: .2s; flex-shrink: 0; }
     .setting-toggle.on { background: var(--primary); }
-    .setting-toggle::after {
-      content: ''; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px;
-      border-radius: 50%; background: #fff; transition: .2s;
-    }
+    .setting-toggle::after { content: ''; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: .2s; }
     .setting-toggle.on::after { right: 22px; }
 
     /* ============ Tour Guide ============ */
-    .tour-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 4000;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
-      animation: fadeIn .3s ease;
-    }
-    .tour-card {
-      background: var(--card); border-radius: 20px; padding: 30px; max-width: 420px; width: 100%;
-      text-align: center; animation: popIn .3s ease;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3);
-    }
+    .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 4000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .3s ease; }
+    .tour-card { background: var(--card); border-radius: 20px; padding: 30px; max-width: 420px; width: 100%; text-align: center; animation: popIn .3s ease; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
     .tour-card .icon { font-size: 64px; margin-bottom: 16px; }
     .tour-card h3 { color: var(--primary); font-size: 20px; margin-bottom: 12px; }
     .tour-card p { color: var(--text); font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
@@ -390,19 +337,21 @@
     .tour-card .tour-next { background: var(--primary); color: #fff; }
     .tour-card .tour-skip { background: var(--input-bg); color: var(--muted); }
 
+    /* ============ Invoice Print ============ */
+    .invoice-print { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      .invoice-print, .invoice-print * { visibility: visible; }
+      .invoice-print { display: block; position: absolute; top: 0; left: 0; width: 100%; padding: 20px; background: #fff; direction: rtl; }
+      .no-print { display: none !important; }
+    }
+
     /* ============ Responsive ============ */
     @media (max-width: 900px) {
       .main { padding: 16px; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
-
-    /* ============ Print ============ */
-    @media print {
-      .sidebar, .topbar, .no-print, .install-banner { display: none !important; }
-      .main { padding: 0; }
-      body { background: #fff; }
-    }
   </style>
 </head>
 <body>
@@ -414,12 +363,10 @@
         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#2c5f8a"/>
-              <stop offset="100%" stop-color="#1e4468"/>
+              <stop offset="0%" stop-color="#2c5f8a"/><stop offset="100%" stop-color="#1e4468"/>
             </linearGradient>
             <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#c9a227"/>
-              <stop offset="100%" stop-color="#8b6914"/>
+              <stop offset="0%" stop-color="#c9a227"/><stop offset="100%" stop-color="#8b6914"/>
             </linearGradient>
           </defs>
           <path d="M20 35 L50 20 L80 35 L80 75 L50 90 L20 75 Z" fill="url(#lg1)"/>
@@ -477,19 +424,29 @@
       <nav class="nav">
         <a class="nav-link active" data-page="dashboard">🏠 الرئيسية</a>
         <a class="nav-link" data-page="warehouses">🏬 المستودعات</a>
-        <a class="nav-link" data-page="search">🔍 البحث</a>
+        <a class="nav-link" data-page="inventory">📦 المخزون</a>
+        <a class="nav-link" data-page="purchases">🛒 فواتير المشتريات</a>
+        <a class="nav-link" data-page="sales">💰 فواتير المبيعات</a>
+        <a class="nav-link" data-page="vouchers">🧾 السندات</a>
+        <a class="nav-link" data-page="partners">🤝 الشركاء</a>
         <a class="nav-link" data-page="transfer">🔄 نقل البضاعة</a>
+        <a class="nav-link" data-page="search">🔍 البحث</a>
         <a class="nav-link" data-page="logs">📋 سجل العمليات</a>
         <a class="nav-link" data-page="alerts">🔔 التنبيهات</a>
         <a class="nav-link" data-page="settings">⚙️ الإعدادات</a>
       </nav>
       <div class="user-box">
-        <img id="user-avatar" src="" alt="" />
-        <div style="flex:1">
-          <div id="user-name" class="user-name"></div>
-          <button id="logout-btn" class="btn-link">خروج</button>
+        <div class="user-info">
+          <img id="user-avatar" src="" alt="" />
+          <div>
+            <div id="user-name" class="user-name"></div>
+            <div style="font-size:11px;color:var(--muted)" id="user-email"></div>
+          </div>
         </div>
-        <button id="theme-toggle" class="theme-toggle" title="تبديل الوضع">🌙</button>
+        <div class="user-actions">
+          <button id="logout-btn" class="btn-link">خروج</button>
+          <button id="theme-toggle" class="theme-toggle" title="تبديل الوضع">🌙</button>
+        </div>
       </div>
     </aside>
 
@@ -503,8 +460,13 @@
       <section id="page-dashboard" class="page active"></section>
       <section id="page-warehouses" class="page"></section>
       <section id="page-warehouse-detail" class="page"></section>
-      <section id="page-search" class="page"></section>
+      <section id="page-inventory" class="page"></section>
+      <section id="page-purchases" class="page"></section>
+      <section id="page-sales" class="page"></section>
+      <section id="page-vouchers" class="page"></section>
+      <section id="page-partners" class="page"></section>
       <section id="page-transfer" class="page"></section>
+      <section id="page-search" class="page"></section>
       <section id="page-logs" class="page"></section>
       <section id="page-alerts" class="page"></section>
       <section id="page-settings" class="page"></section>
@@ -523,7 +485,7 @@
     </div>
   </div>
 
-  <!-- Camera Overlay (Small Hole-Punch) -->
+  <!-- Camera Overlay -->
   <div id="camera-overlay" class="camera-overlay hidden">
     <button class="camera-close" id="camera-close">✕</button>
     <div class="camera-box">
@@ -549,6 +511,9 @@
     <button class="accept" id="install-accept">تثبيت</button>
     <button class="dismiss" id="install-dismiss">✕</button>
   </div>
+
+  <!-- Invoice Print Container -->
+  <div id="invoice-print-container" class="invoice-print"></div>
 
   <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -625,7 +590,7 @@
     }
 
     // ============================================
-    // Barcode Scanner (via html5-qrcode)
+    // Barcode Scanner
     // ============================================
     function stopCamera() {
       if (html5QrCode) {
@@ -640,40 +605,23 @@
     function startBarcodeScan(callback) {
       const overlay = $("#camera-overlay");
       overlay.classList.remove("hidden");
-
       $("#camera-close").onclick = () => stopCamera();
-
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
-      }
-
+      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
       const config = {
         fps: 10,
         qrbox: { width: 250, height: 150 },
         formatsToSupport: [
-          Html5QrcodeSupportedFormats.EAN_13,
-          Html5QrcodeSupportedFormats.EAN_8,
-          Html5QrcodeSupportedFormats.CODE_128,
-          Html5QrcodeSupportedFormats.CODE_39,
-          Html5QrcodeSupportedFormats.UPC_A,
-          Html5QrcodeSupportedFormats.UPC_E,
-          Html5QrcodeSupportedFormats.CODABAR,
-          Html5QrcodeSupportedFormats.ITF
+          Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.CODABAR, Html5QrcodeSupportedFormats.ITF
         ]
       };
-
       html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        (decodedText) => {
-          stopCamera();
-          callback(decodedText);
-        },
-        () => {} // ignore errors
-      ).catch(err => {
-        showToast("تعذر فتح الكاميرا: " + err, "error");
-        stopCamera();
-      });
+        { facingMode: "environment" }, config,
+        (decodedText) => { stopCamera(); callback(decodedText); },
+        () => {}
+      ).catch(err => { showToast("تعذر فتح الكاميرا: " + err, "error"); stopCamera(); });
     }
 
     // ============================================
@@ -712,6 +660,8 @@
     // ============================================
     const whCol = () => collection(db, "users", currentUser.uid, "warehouses");
     const logCol = () => collection(db, "users", currentUser.uid, "logs");
+    const vouchersCol = () => collection(db, "users", currentUser.uid, "vouchers");
+    const partnersCol = () => collection(db, "users", currentUser.uid, "partners");
     const itemsCol = (whId) => collection(db, "users", currentUser.uid, "warehouses", whId, "items");
 
     async function addLog(action, details) {
@@ -764,6 +714,87 @@
     }
     async function getRecentLogs(max = 5) { return getLogs(max, { limit: max }); }
 
+    async function addPartner(name, type, phone, notes) {
+      await addDoc(partnersCol(), { name, type, phone: phone || "", notes: notes || "", createdAt: serverTimestamp() });
+      await addLog("إضافة شريك", `${type}: ${name}`);
+    }
+    async function getPartners(type = null) {
+      let q = query(partnersCol(), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      let partners = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (type) partners = partners.filter(p => p.type === type);
+      return partners;
+    }
+    async function deletePartner(id, name) {
+      await deleteDoc(doc(partnersCol(), id));
+      await addLog("حذف شريك", name);
+    }
+
+    // إضافة فاتورة (مشتريات أو مبيعات)
+    async function addInvoice(type, whId, whName, partnerId, partnerName, items, notes, total) {
+      const invoice = {
+        type, warehouseId: whId, warehouseName: whName,
+        partnerId: partnerId || "", partnerName: partnerName || "",
+        items, notes: notes || "", total: total || 0, createdAt: serverTimestamp()
+      };
+      const ref = await addDoc(vouchersCol(), invoice);
+      await addLog(type === "purchase" ? "فاتورة شراء" : "فاتورة بيع", 
+        `${items.length} صنف في ${whName}${total ? ` بقيمة ${total} ج.م` : ""}${partnerName ? ` - ${partnerName}` : ""}`);
+
+      // تحديث المخزون
+      for (const item of items) {
+        const itemsSnap = await getDocs(itemsCol(whId));
+        let existing = null;
+        itemsSnap.forEach(d => {
+          if ((d.data().name || "").trim().toLowerCase() === item.name.trim().toLowerCase()) {
+            existing = { id: d.id, ...d.data() };
+          }
+        });
+        if (existing) {
+          const newQty = type === "purchase" 
+            ? (Number(existing.quantity) || 0) + Number(item.quantity)
+            : Math.max(0, (Number(existing.quantity) || 0) - Number(item.quantity));
+          await updateDoc(doc(itemsCol(whId), existing.id), {
+            quantity: newQty, price: item.price || existing.price, updatedAt: serverTimestamp()
+          });
+        } else if (type === "purchase") {
+          await addDoc(itemsCol(whId), {
+            name: item.name, barcode: item.barcode || "", price: Number(item.price) || 0,
+            quantity: Number(item.quantity), minQuantity: 0, description: "",
+            createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+          });
+        }
+      }
+      return ref.id;
+    }
+
+    async function getInvoices(max = 100, type = null) {
+      let q = query(vouchersCol(), orderBy("createdAt", "desc"), limit(max));
+      const snap = await getDocs(q);
+      let vouchers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (type) vouchers = vouchers.filter(v => v.type === type);
+      return vouchers;
+    }
+    async function getInvoice(id) {
+      const s = await getDoc(doc(vouchersCol(), id));
+      return s.exists() ? { id: s.id, ...s.data() } : null;
+    }
+
+    // إضافة سند (صرف/قبض/قيد)
+    async function addVoucher(type, amount, partnerName, notes) {
+      const v = { type, amount: Number(amount) || 0, partnerName: partnerName || "", notes: notes || "", createdAt: serverTimestamp() };
+      await addDoc(collection(db, "users", currentUser.uid, "vouchers_manual"), v);
+      await addLog(type === "receipt" ? "سند قبض" : type === "payment" ? "سند صرف" : "سند قيد",
+        `${amount} ج.م${partnerName ? ` - ${partnerName}` : ""}`);
+    }
+    async function getManualVouchers(max = 100, type = null) {
+      let q = query(collection(db, "users", currentUser.uid, "vouchers_manual"), orderBy("createdAt", "desc"), limit(max));
+      const snap = await getDocs(q);
+      let vouchers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (type) vouchers = vouchers.filter(v => v.type === type);
+      return vouchers;
+    }
+
     async function aggregateByName(term) {
       const whSnap = await getDocs(whCol());
       const map = new Map();
@@ -802,22 +833,18 @@
       if (fromWhId === toWhId) throw new Error("لا يمكن النقل لنفس المستودع");
       qty = Number(qty);
       if (!qty || qty <= 0) throw new Error("الكمية يجب أن تكون أكبر من صفر");
-
       const srcSnap = await getDocs(itemsCol(fromWhId));
       let srcDoc = null;
       const target = itemName.trim().toLowerCase();
       srcSnap.forEach(d => { if ((d.data().name || "").trim().toLowerCase() === target) srcDoc = { id: d.id, ...d.data() }; });
       if (!srcDoc) throw new Error("الصنف غير موجود في المصدر");
       if (Number(srcDoc.quantity) < qty) throw new Error(`الكمية غير كافية (متوفر: ${srcDoc.quantity})`);
-
       const dstSnap = await getDocs(itemsCol(toWhId));
       let dstDoc = null;
       dstSnap.forEach(d => { if ((d.data().name || "").trim().toLowerCase() === target) dstDoc = { id: d.id, ...d.data() }; });
-
       const srcRef = doc(db, "users", currentUser.uid, "warehouses", fromWhId, "items", srcDoc.id);
       const dstRef = dstDoc ? doc(db, "users", currentUser.uid, "warehouses", toWhId, "items", dstDoc.id) : null;
       const dstNewRef = !dstDoc ? doc(itemsCol(toWhId)) : null;
-
       await runTransaction(db, async (tx) => {
         const s = await tx.get(srcRef);
         const cur = Number(s.data().quantity) || 0;
@@ -830,8 +857,7 @@
           tx.set(dstNewRef, {
             name: srcDoc.name, price: srcDoc.price, quantity: qty,
             description: srcDoc.description || "", imageUrl: srcDoc.imageUrl || "",
-            barcode: srcDoc.barcode || "",
-            minQuantity: srcDoc.minQuantity || 0,
+            barcode: srcDoc.barcode || "", minQuantity: srcDoc.minQuantity || 0,
             createdAt: serverTimestamp(), updatedAt: serverTimestamp()
           });
         }
@@ -840,15 +866,15 @@
     }
 
     // ============================================
-    // Tour Guide (Onboarding)
+    // Tour Guide
     // ============================================
     const tourSteps = [
       { icon: "👋", title: "أهلاً بك!", text: "مرحباً بك في نظام إدارة المستودعات. سنأخذك في جولة سريعة لتتعرف على أهم الميزات." },
-      { icon: "🏬", title: "أضف مستودعك الأول", text: "من صفحة 'المستودعات'، اضغط على زر '+ مستودع جديد' لإنشاء مستودعك الأول. يمكنك إضافة عدة مستودعات." },
-      { icon: "📦", title: "أضف الأصناف", text: "افتح المستودع واضغط '+ إضافة صنف'. يمكنك مسح الباركود بالكاميرا مباشرة، أو كتابته يدوياً. حدد الكمية والسعر والحد الأدنى للتنبيه." },
-      { icon: "🔄", title: "انقل البضاعة", text: "من صفحة 'نقل البضاعة'، اختر المستودع المصدر، ثم الصنف (سيظهر لك الرصيد المتاح)، ثم الكمية، والمستودع المستلم." },
-      { icon: "🔍", title: "ابحث بسهولة", text: "من صفحة 'البحث'، اكتب اسم الصنف أو امسح الباركود بالكاميرا لمعرفة كمياته في جميع المستودعات دفعة واحدة." },
-      { icon: "⚙️", title: "خصص حسابك", text: "من صفحة 'الإعدادات'، يمكنك تغيير اسمك، كلمة المرور، الوضع الليلي، وشكل القائمة (أفقي أو جانبي)." }
+      { icon: "🏬", title: "أضف مستودعك الأول", text: "من صفحة 'المستودعات'، اضغط على زر '+ مستودع جديد' لإنشاء مستودعك الأول." },
+      { icon: "📦", title: "أضف الأصناف", text: "من صفحة 'المخزون'، يمكنك إضافة أصناف جديدة أو تعديل الموجود. يمكنك مسح الباركود بالكاميرا." },
+      { icon: "🤝", title: "أضف شركاءك", text: "من صفحة 'الشركاء'، أضف العملاء والموردين والمندوبين لتتمكن من ربطهم بالفواتير." },
+      { icon: "🛒", title: "الفواتير", text: "من صفحة 'فواتير المشتريات' أو 'المبيعات'، سجل الفواتير واختر الشريك. يمكنك طباعتها أو حفظها PDF." },
+      { icon: "⚙️", title: "خصص حسابك", text: "من صفحة 'الإعدادات'، يمكنك تغيير اسمك، كلمة المرور، الوضع الليلي، وشكل القائمة." }
     ];
 
     let tourIndex = 0;
@@ -889,11 +915,8 @@
       const btn = $("#google-login-btn");
       try {
         setLoading(btn, true, "جارٍ الدخول...");
-        if (isMobile()) {
-          await signInWithRedirect(auth, googleProvider);
-        } else {
-          await signInWithPopup(auth, googleProvider);
-        }
+        if (isMobile()) await signInWithRedirect(auth, googleProvider);
+        else await signInWithPopup(auth, googleProvider);
       } catch (e) {
         if (e.code !== "auth/popup-closed-by-user") showToast("فشل: " + e.message, "error");
         setLoading(btn, false);
@@ -928,15 +951,12 @@
         currentUser = user;
         $("#login-screen").classList.add("hidden");
         $("#app").classList.remove("hidden");
-        $("#user-name").textContent = user.displayName || user.email || "مستخدم";
+        $("#user-name").textContent = user.displayName || "مستخدم";
+        $("#user-email").textContent = user.email || "";
         $("#user-avatar").src = user.photoURL || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%232c5f8a' width='40' height='40'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.35em' fill='white' font-size='18'%3E👤%3C/text%3E%3C/svg%3E";
         applyLayout(localStorage.getItem("layout") || "top");
         navigate("dashboard");
-
-        // إظهار الجولة للمستخدم الجديد
-        if (!localStorage.getItem("tourDone")) {
-          setTimeout(startTour, 800);
-        }
+        if (!localStorage.getItem("tourDone")) setTimeout(startTour, 800);
       } else {
         currentUser = null;
         $("#login-screen").classList.remove("hidden");
@@ -949,14 +969,15 @@
     // ============================================
     const pageTitles = {
       dashboard: "الرئيسية", warehouses: "المستودعات", "warehouse-detail": "تفاصيل المستودع",
-      search: "البحث", transfer: "نقل البضاعة", logs: "سجل العمليات", alerts: "التنبيهات", settings: "الإعدادات"
+      inventory: "المخزون", purchases: "فواتير المشتريات", sales: "فواتير المبيعات",
+      vouchers: "السندات", partners: "الشركاء", transfer: "نقل البضاعة", search: "البحث",
+      logs: "سجل العمليات", alerts: "التنبيهات", settings: "الإعدادات"
     };
 
     function navigate(page, payload) {
       document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
       document.querySelectorAll(".nav-link").forEach(a => a.classList.remove("active"));
       $("#page-title").textContent = pageTitles[page] || "";
-
       if (page === "warehouse-detail") {
         currentWarehouseId = payload;
         renderWarehouseDetail(payload);
@@ -968,8 +989,13 @@
         const pageEl = $(`#page-${page}`);
         if (page === "dashboard") renderDashboard(pageEl);
         if (page === "warehouses") renderWarehouses(pageEl);
-        if (page === "search") renderSearch(pageEl);
+        if (page === "inventory") renderInventory(pageEl);
+        if (page === "purchases") renderInvoices(pageEl, "purchase");
+        if (page === "sales") renderInvoices(pageEl, "sale");
+        if (page === "vouchers") renderVouchers(pageEl);
+        if (page === "partners") renderPartners(pageEl);
         if (page === "transfer") renderTransfer(pageEl);
+        if (page === "search") renderSearch(pageEl);
         if (page === "logs") renderLogs(pageEl);
         if (page === "alerts") renderAlerts(pageEl);
         if (page === "settings") renderSettings(pageEl);
@@ -978,7 +1004,7 @@
     document.querySelectorAll(".nav-link").forEach(a => a.addEventListener("click", () => navigate(a.dataset.page)));
 
     // ============================================
-    // Dashboard (Fixed Unique Count)
+    // Dashboard
     // ============================================
     async function renderDashboard(page) {
       if (page.dataset.loaded === "1") return;
@@ -986,19 +1012,17 @@
       try {
         const whs = await getWarehouses();
         let totalQty = 0;
-        const uniqueItems = new Set(); // لحساب الأصناف الفريدة
-        
+        const uniqueItems = new Set();
         for (const wh of whs) {
           const items = await getItems(wh.id);
           items.forEach(it => {
             totalQty += Number(it.quantity) || 0;
-            uniqueItems.add((it.name || "").trim().toLowerCase()); // إضافة اسم الصنف للمجموعة
+            uniqueItems.add((it.name || "").trim().toLowerCase());
           });
         }
         const logs = await getRecentLogs(5);
         const lowStock = await getLowStockItems();
 
-        // إذا لم يكن هناك مستودعات، أظهر بطاقة ترحيبية
         if (whs.length === 0) {
           page.innerHTML = `
             <div class="section-card" style="text-align:center;padding:40px 20px">
@@ -1277,76 +1301,398 @@
     }
 
     // ============================================
-    // Export PDF via html2canvas (correct Arabic)
+    // Inventory (المخزون)
+    // ============================================
+    async function renderInventory(page) {
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const whs = await getWarehouses();
+        let allItems = [];
+        for (const wh of whs) {
+          const items = await getItems(wh.id);
+          items.forEach(it => allItems.push({ ...it, warehouseName: wh.name, warehouseId: wh.id }));
+        }
+        const uniqueMap = new Map();
+        allItems.forEach(it => {
+          const key = (it.name || "").trim().toLowerCase();
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, { name: it.name, barcode: it.barcode, totalQty: 0, price: it.price, warehouses: [] });
+          }
+          const e = uniqueMap.get(key);
+          e.totalQty += Number(it.quantity) || 0;
+          e.warehouses.push({ whName: it.warehouseName, whId: it.warehouseId, qty: it.quantity });
+        });
+        const uniqueItems = Array.from(uniqueMap.values());
+
+        page.innerHTML = `
+          <div class="section-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+              <h3 style="margin:0">📦 المخزون (${uniqueItems.length} صنف)</h3>
+              <button id="inv-add-btn" class="btn btn-primary">+ إضافة صنف</button>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <input id="inv-search" class="form-control" placeholder="ابحث بالاسم أو الباركود..." />
+              <button id="inv-scan-btn" class="btn btn-primary" style="white-space:nowrap">📷 كاميرا</button>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="table">
+                <thead><tr><th>الصنف</th><th>الباركود</th><th>السعر</th><th>إجمالي الكمية</th><th>المستودعات</th></tr></thead>
+                <tbody id="inv-body">
+                  ${uniqueItems.map(it => `
+                    <tr>
+                      <td><b>${it.name}</b></td>
+                      <td>${it.barcode || "-"}</td>
+                      <td>${fmtMoney(it.price)}</td>
+                      <td><b style="color:var(--primary)">${it.totalQty}</b></td>
+                      <td>${it.warehouses.map(w => `<span class="wh-badge" style="margin:2px">${w.whName}: ${w.qty}</span>`).join("")}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+            ${uniqueItems.length === 0 ? '<div class="empty-state">لا أصناف في المخزون</div>' : ''}
+          </div>`;
+
+        const doSearch = (term) => {
+          const t = term.trim().toLowerCase();
+          document.querySelectorAll("#inv-body tr").forEach(tr => {
+            tr.style.display = tr.textContent.toLowerCase().includes(t) ? "" : "none";
+          });
+        };
+        $("#inv-search").addEventListener("input", (e) => doSearch(e.target.value));
+        $("#inv-scan-btn").onclick = () => {
+          startBarcodeScan((code) => { $("#inv-search").value = code; doSearch(code); });
+        };
+        $("#inv-add-btn").onclick = () => {
+          if (!whs.length) return showToast("أضف مستودعاً أولاً", "error");
+          openItemModal(whs[0], null);
+        };
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    // ============================================
+    // Invoices (مبيعات/مشتريات)
+    // ============================================
+    async function renderInvoices(page, type) {
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const whs = await getWarehouses();
+        const partners = await getPartners(type === "sale" ? "customer" : "supplier");
+        if (!whs.length) {
+          page.innerHTML = `<div class="section-card"><div class="empty-state"><div class="icon">🏬</div>أضف مستودعاً أولاً</div></div>`;
+          return;
+        }
+        const title = type === "purchase" ? "فاتورة مشتريات" : "فاتورة مبيعات";
+        const partnerLabel = type === "purchase" ? "المورد" : "العميل";
+
+        page.innerHTML = `
+          <div class="section-card">
+            <h3>${title}</h3>
+            <div class="form-group"><label>المستودع <span class="req">*</span></label>
+              <select id="inv-wh" class="form-control">${whs.map(w => `<option value="${w.id}">${w.name}</option>`).join("")}</select></div>
+            <div class="form-group"><label>${partnerLabel} <span class="opt">(اختياري)</span></label>
+              <select id="inv-partner" class="form-control">
+                <option value="">-- بدون --</option>
+                ${partners.map(p => `<option value="${p.id}">${p.name}</option>`).join("")}
+              </select></div>
+            <div id="inv-items"></div>
+            <button id="inv-add-row" class="btn btn-outline" style="margin-bottom:12px">+ إضافة صنف</button>
+            <div class="form-group"><label>ملاحظات</label>
+              <textarea id="inv-notes" class="form-control"></textarea></div>
+            <button id="inv-save" class="btn btn-primary" style="width:100%">حفظ ${title}</button>
+          </div>
+          <div id="inv-list" class="section-card"></div>`;
+
+        const addRow = () => {
+          const div = document.createElement("div");
+          div.className = "inv-item-row";
+          div.style.cssText = "display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end";
+          div.innerHTML = `
+            <input class="form-control i-name" placeholder="اسم الصنف" />
+            <input class="form-control i-qty" type="number" min="1" placeholder="الكمية" />
+            <input class="form-control i-price" type="number" min="0" step="0.01" placeholder="السعر" />
+            <button class="btn btn-danger btn-sm i-remove">✕</button>`;
+          div.querySelector(".i-remove").onclick = () => div.remove();
+          $("#inv-items").appendChild(div);
+        };
+        addRow();
+        $("#inv-add-row").onclick = addRow;
+
+        $("#inv-save").onclick = async () => {
+          const whId = $("#inv-wh").value;
+          const whName = whs.find(w => w.id === whId).name;
+          const partnerId = $("#inv-partner").value;
+          const partnerName = partners.find(p => p.id === partnerId)?.name || "";
+          const rows = document.querySelectorAll(".inv-item-row");
+          const items = [];
+          let total = 0;
+          rows.forEach(r => {
+            const name = r.querySelector(".i-name").value.trim();
+            const qty = Number(r.querySelector(".i-qty").value);
+            const price = Number(r.querySelector(".i-price").value) || 0;
+            if (name && qty > 0) {
+              items.push({ name, quantity: qty, price });
+              total += qty * price;
+            }
+          });
+          if (!items.length) return showToast("أضف صنفاً واحداً على الأقل", "error");
+          const btn = $("#inv-save");
+          try {
+            setLoading(btn, true);
+            const invId = await addInvoice(type, whId, whName, partnerId, partnerName, items, $("#inv-notes").value.trim(), total);
+            showToast("تم حفظ الفاتورة", "success");
+            const inv = await getInvoice(invId);
+            showInvoiceModal(inv);
+            renderInvoices(page, type);
+          } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+        };
+
+        // قائمة الفواتير
+        const invList = await getInvoices(50, type);
+        $("#inv-list").innerHTML = `
+          <h3>📋 آخر الفواتير (${invList.length})</h3>
+          ${invList.length ? `<div style="overflow-x:auto"><table class="table">
+            <thead><tr><th>#</th><th>المستودع</th><th>${partnerLabel}</th><th>الإجمالي</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+            <tbody>${invList.map(v => `
+              <tr>
+                <td>${v.id.slice(0,6)}</td>
+                <td>${v.warehouseName}</td>
+                <td>${v.partnerName || "-"}</td>
+                <td>${fmtMoney(v.total)}</td>
+                <td>${fmtDate(v.createdAt)}</td>
+                <td><button class="btn btn-outline btn-sm view-inv" data-id="${v.id}">عرض</button></td>
+              </tr>
+            `).join("")}</tbody>
+          </table></div>` : '<div class="empty-state">لا فواتير بعد</div>'}`;
+
+        $("#inv-list").querySelectorAll(".view-inv").forEach(btn => {
+          btn.onclick = async () => {
+            const inv = await getInvoice(btn.dataset.id);
+            showInvoiceModal(inv);
+          };
+        });
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    async function showInvoiceModal(inv) {
+      if (!inv) return;
+      openModal("فاتورة", `
+        <div id="invoice-view" style="padding:16px;background:#fff;color:#000;border-radius:8px;direction:rtl">
+          <h2 style="text-align:center;color:#2c5f8a">فاتورة ${inv.type === "purchase" ? "مشتريات" : "مبيعات"}</h2>
+          <p style="text-align:center;font-size:12px;color:#666">#${inv.id.slice(0,8)} - ${fmtDate(inv.createdAt)}</p>
+          <hr style="margin:12px 0" />
+          <p><b>المستودع:</b> ${inv.warehouseName}</p>
+          <p><b>${inv.type === "purchase" ? "المورد" : "العميل"}:</b> ${inv.partnerName || "-"}</p>
+          <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px">
+            <thead><tr style="background:#2c5f8a;color:#fff"><th style="padding:8px">الصنف</th><th style="padding:8px">الكمية</th><th style="padding:8px">السعر</th><th style="padding:8px">الإجمالي</th></tr></thead>
+            <tbody>${inv.items.map(i => `
+              <tr><td style="padding:6px;border:1px solid #ddd">${i.name}</td><td style="padding:6px;border:1px solid #ddd">${i.quantity}</td><td style="padding:6px;border:1px solid #ddd">${fmtMoney(i.price)}</td><td style="padding:6px;border:1px solid #ddd">${fmtMoney(i.price * i.quantity)}</td></tr>
+            `).join("")}</tbody>
+          </table>
+          <p style="text-align:left;font-size:16px"><b>الإجمالي: ${fmtMoney(inv.total)}</b></p>
+          ${inv.notes ? `<p><b>ملاحظات:</b> ${inv.notes}</p>` : ""}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button id="print-inv" class="btn btn-primary" style="flex:1">🖨️ طباعة / PDF</button>
+        </div>`);
+      $("#print-inv").onclick = () => printInvoice(inv);
+    }
+
+    function printInvoice(inv) {
+      const container = $("#invoice-print-container");
+      container.innerHTML = `
+        <div style="padding:20px;font-family:'Tajawal',sans-serif">
+          <h2 style="text-align:center;color:#2c5f8a">فاتورة ${inv.type === "purchase" ? "مشتريات" : "مبيعات"}</h2>
+          <p style="text-align:center;font-size:12px;color:#666">#${inv.id.slice(0,8)} - ${fmtDate(inv.createdAt)}</p>
+          <hr style="margin:12px 0" />
+          <p><b>المستودع:</b> ${inv.warehouseName}</p>
+          <p><b>${inv.type === "purchase" ? "المورد" : "العميل"}:</b> ${inv.partnerName || "-"}</p>
+          <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px">
+            <thead><tr style="background:#2c5f8a;color:#fff"><th style="padding:8px;border:1px solid #ccc">الصنف</th><th style="padding:8px;border:1px solid #ccc">الكمية</th><th style="padding:8px;border:1px solid #ccc">السعر</th><th style="padding:8px;border:1px solid #ccc">الإجمالي</th></tr></thead>
+            <tbody>${inv.items.map(i => `
+              <tr><td style="padding:6px;border:1px solid #ccc">${i.name}</td><td style="padding:6px;border:1px solid #ccc">${i.quantity}</td><td style="padding:6px;border:1px solid #ccc">${fmtMoney(i.price)}</td><td style="padding:6px;border:1px solid #ccc">${fmtMoney(i.price * i.quantity)}</td></tr>
+            `).join("")}</tbody>
+          </table>
+          <p style="text-align:left;font-size:16px"><b>الإجمالي: ${fmtMoney(inv.total)}</b></p>
+          ${inv.notes ? `<p><b>ملاحظات:</b> ${inv.notes}</p>` : ""}
+        </div>`;
+      window.print();
+    }
+
+    // ============================================
+    // Manual Vouchers (سندات صرف/قبض/قيد)
+    // ============================================
+    async function renderVouchers(page) {
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const partners = await getPartners();
+        const vouchers = await getManualVouchers(50);
+
+        page.innerHTML = `
+          <div class="section-card">
+            <h3>🧾 سند جديد</h3>
+            <div class="form-group"><label>نوع السند</label>
+              <select id="v-type" class="form-control">
+                <option value="receipt">سند قبض</option>
+                <option value="payment">سند صرف</option>
+                <option value="journal">سند قيد</option>
+              </select></div>
+            <div class="form-group"><label>المبلغ <span class="req">*</span></label>
+              <input id="v-amount" type="number" min="0" step="0.01" class="form-control" /></div>
+            <div class="form-group"><label>الشريك</label>
+              <select id="v-partner" class="form-control">
+                <option value="">-- بدون --</option>
+                ${partners.map(p => `<option value="${p.name}">${p.name} (${p.type === 'customer' ? 'عميل' : p.type === 'supplier' ? 'مورد' : 'مندوب'})</option>`).join("")}
+              </select></div>
+            <div class="form-group"><label>ملاحظات</label>
+              <textarea id="v-notes" class="form-control"></textarea></div>
+            <button id="v-save" class="btn btn-primary" style="width:100%">حفظ السند</button>
+          </div>
+          <div class="section-card">
+            <h3>📋 السندات (${vouchers.length})</h3>
+            ${vouchers.length ? `<div style="overflow-x:auto"><table class="table">
+              <thead><tr><th>النوع</th><th>المبلغ</th><th>الشريك</th><th>ملاحظات</th><th>التاريخ</th></tr></thead>
+              <tbody>${vouchers.map(v => `
+                <tr>
+                  <td><span class="low-badge" style="background:${v.type === 'receipt' ? 'var(--success)' : v.type === 'payment' ? 'var(--danger)' : 'var(--primary)'}">${v.type === 'receipt' ? 'قبض' : v.type === 'payment' ? 'صرف' : 'قيد'}</span></td>
+                  <td>${fmtMoney(v.amount)}</td>
+                  <td>${v.partnerName || "-"}</td>
+                  <td>${v.notes || "-"}</td>
+                  <td>${fmtDate(v.createdAt)}</td>
+                </tr>
+              `).join("")}</tbody>
+            </table></div>` : '<div class="empty-state">لا سندات بعد</div>'}
+          </div>`;
+
+        $("#v-save").onclick = async () => {
+          const type = $("#v-type").value;
+          const amount = $("#v-amount").value;
+          const partner = $("#v-partner").value;
+          const notes = $("#v-notes").value.trim();
+          if (!amount || Number(amount) <= 0) return showToast("أدخل مبلغاً صحيحاً", "error");
+          const btn = $("#v-save");
+          try {
+            setLoading(btn, true);
+            await addVoucher(type, amount, partner, notes);
+            showToast("تم حفظ السند", "success");
+            renderVouchers(page);
+          } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+        };
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    // ============================================
+    // Partners (الشركاء)
+    // ============================================
+    async function renderPartners(page) {
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const partners = await getPartners();
+        page.innerHTML = `
+          <div class="section-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+              <h3 style="margin:0">🤝 الشركاء (${partners.length})</h3>
+              <button id="add-partner-btn" class="btn btn-primary">+ شريك جديد</button>
+            </div>
+            ${partners.length ? `<div style="overflow-x:auto"><table class="table">
+              <thead><tr><th>الاسم</th><th>النوع</th><th>الهاتف</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
+              <tbody>${partners.map(p => `
+                <tr>
+                  <td><b>${p.name}</b></td>
+                  <td><span class="wh-badge">${p.type === 'customer' ? 'عميل' : p.type === 'supplier' ? 'مورد' : 'مندوب'}</span></td>
+                  <td>${p.phone || "-"}</td>
+                  <td>${p.notes || "-"}</td>
+                  <td><button class="btn btn-danger btn-sm del-partner" data-id="${p.id}" data-name="${p.name}">حذف</button></td>
+                </tr>
+              `).join("")}</tbody>
+            </table></div>` : '<div class="empty-state">لا شركاء بعد</div>'}
+          </div>`;
+        $("#add-partner-btn").onclick = () => openPartnerModal();
+        page.querySelectorAll(".del-partner").forEach(btn => {
+          btn.onclick = async () => {
+            if (!confirm(`حذف "${btn.dataset.name}"؟`)) return;
+            try { await deletePartner(btn.dataset.id, btn.dataset.name); showToast("تم الحذف", "success"); renderPartners(page); }
+            catch (e) { showToast("فشل: " + e.message, "error"); }
+          };
+        });
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    function openPartnerModal() {
+      openModal("شريك جديد", `
+        <div class="form-group"><label>الاسم <span class="req">*</span></label>
+          <input id="pt-name" class="form-control" /></div>
+        <div class="form-group"><label>النوع</label>
+          <select id="pt-type" class="form-control">
+            <option value="customer">عميل</option>
+            <option value="supplier">مورد</option>
+            <option value="delegate">مندوب</option>
+          </select></div>
+        <div class="form-group"><label>الهاتف</label>
+          <input id="pt-phone" class="form-control" /></div>
+        <div class="form-group"><label>ملاحظات</label>
+          <textarea id="pt-notes" class="form-control"></textarea></div>
+        <button id="pt-save" class="btn btn-primary" style="width:100%">حفظ</button>`);
+      $("#pt-save").onclick = async () => {
+        const name = $("#pt-name").value.trim();
+        if (!name) return showToast("أدخل الاسم", "error");
+        const btn = $("#pt-save");
+        try {
+          setLoading(btn, true);
+          await addPartner(name, $("#pt-type").value, $("#pt-phone").value.trim(), $("#pt-notes").value.trim());
+          closeModal(); showToast("تم الحفظ", "success");
+          renderPartners($("#page-partners"));
+        } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+      };
+    }
+
+    // ============================================
+    // Export
     // ============================================
     async function exportWarehousePDF(wh, items) {
       showToast("جارٍ تجهيز PDF...", "success");
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF("p", "mm", "a4");
-
       const wrap = document.createElement("div");
       wrap.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:800px;background:#fff;padding:24px;font-family:'Tajawal',sans-serif;direction:rtl;";
       wrap.innerHTML = `
         <h1 style="text-align:center;color:#2c5f8a;margin-bottom:8px;font-size:22px">${wh.name}</h1>
         <p style="text-align:center;color:#64748b;font-size:12px;margin-bottom:20px">${new Date().toLocaleString("ar-EG")}</p>
         <table style="width:100%;border-collapse:collapse;font-size:13px">
-          <thead>
-            <tr style="background:#2c5f8a;color:#fff">
-              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الصنف</th>
-              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الباركود</th>
-              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">السعر</th>
-              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الكمية</th>
-              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الحد الأدنى</th>
-              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الوصف</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${items.map(it => `
-              <tr>
-                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.name}</td>
-                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.barcode || "-"}</td>
-                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.price || "-"}</td>
-                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.quantity}</td>
-                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.minQuantity || "-"}</td>
-                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.description || "-"}</td>
-              </tr>
-            `).join("")}
-          </tbody>
+          <thead><tr style="background:#2c5f8a;color:#fff">
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الصنف</th>
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الباركود</th>
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">السعر</th>
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الكمية</th>
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الحد الأدنى</th>
+            <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الوصف</th>
+          </tr></thead>
+          <tbody>${items.map(it => `
+            <tr>
+              <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.name}</td>
+              <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.barcode || "-"}</td>
+              <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.price || "-"}</td>
+              <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.quantity}</td>
+              <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.minQuantity || "-"}</td>
+              <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.description || "-"}</td>
+            </tr>`).join("")}</tbody>
         </table>`;
       document.body.appendChild(wrap);
-
       try {
         const canvas = await html2canvas(wrap, { scale: 2, backgroundColor: "#fff", useCORS: true });
         const imgData = canvas.toDataURL("image/png");
         const pdfW = 210;
         const pdfH = (canvas.height * pdfW) / canvas.width;
-        let y = 0;
-        const pageH = 297;
-        if (pdfH <= pageH) {
-          doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
-        } else {
-          let remaining = pdfH;
-          while (remaining > 0) {
-            doc.addImage(imgData, "PNG", 0, -y, pdfW, pdfH);
-            remaining -= pageH;
-            y += pageH;
-            if (remaining > 0) doc.addPage();
-          }
-        }
+        if (pdfH <= 297) doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+        else { let y=0; let rem=pdfH; while(rem>0){ doc.addImage(imgData,"PNG",0,-y,pdfW,pdfH); rem-=297; y+=297; if(rem>0)doc.addPage(); } }
         doc.save(`${wh.name}-${new Date().toISOString().slice(0,10)}.pdf`);
         showToast("تم تصدير PDF", "success");
-      } catch (e) {
-        showToast("فشل PDF: " + e.message, "error");
-      } finally {
-        wrap.remove();
-      }
+      } catch (e) { showToast("فشل PDF: " + e.message, "error"); }
+      finally { wrap.remove(); }
     }
 
     function exportWarehouseExcel(wh, items) {
-      const data = items.map(it => ({
-        "الصنف": it.name, "الباركود": it.barcode || "-", "السعر": it.price || "-", "الكمية": it.quantity,
-        "الحد الأدنى": it.minQuantity || "-", "الوصف": it.description || "-"
-      }));
+      const data = items.map(it => ({ "الصنف": it.name, "الباركود": it.barcode || "-", "السعر": it.price || "-", "الكمية": it.quantity, "الحد الأدنى": it.minQuantity || "-", "الوصف": it.description || "-" }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, wh.name.substring(0, 30));
@@ -1377,11 +1723,7 @@
         timer = setTimeout(() => performSearch(lastSearchTerm), 300);
       });
       $("#scan-search-btn").onclick = () => {
-        startBarcodeScan((code) => {
-          lastSearchTerm = code;
-          input.value = code;
-          performSearch(code);
-        });
+        startBarcodeScan((code) => { lastSearchTerm = code; input.value = code; performSearch(code); });
       };
       if (lastSearchTerm) performSearch(lastSearchTerm);
     }
@@ -1507,7 +1849,7 @@
       page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
       try {
         const logs = await getLogs(500, logsFilter);
-        const actions = ["إضافة مستودع","حذف مستودع","تعديل مستودع","إضافة صنف","حذف صنف","تعديل صنف","نقل بضاعة"];
+        const actions = ["إضافة مستودع","حذف مستودع","تعديل مستودع","إضافة صنف","حذف صنف","تعديل صنف","نقل بضاعة","فاتورة شراء","فاتورة بيع","سند قبض","سند صرف","سند قيد","إضافة شريك","حذف شريك"];
         page.innerHTML = `
           <div class="section-card">
             <h3>📋 سجل العمليات (${logs.length})
@@ -1725,7 +2067,6 @@
     };
     $("#install-dismiss").onclick = () => $("#install-banner").classList.add("hidden");
 
-    // Register Service Worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("service-worker.js").catch(() => {});
     }
