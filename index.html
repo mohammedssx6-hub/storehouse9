@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#2c5f8a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="المستودعات" />
+  <title>إدارة المستودعات والمخزون</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- مكتبة html5-qrcode لقراءة الباركود بدقة عالية -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f4f6f9; --card: #fff; --primary: #2c5f8a; --primary-dark: #1e4468;
+      --accent: #c9a227; --text: #1e293b; --muted: #64748b; --border: #e2e8f0;
+      --success: #16a34a; --danger: #dc2626; --warning: #ea580c;
+      --shadow: 0 4px 16px rgba(0,0,0,.06); --radius: 14px;
+      --sidebar-bg: #fff; --input-bg: #fafbfd;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --primary-dark: #2563eb;
+      --accent: #fbbf24; --text: #e2e8f0; --muted: #94a3b8; --border: #334155;
+      --shadow: 0 4px 16px rgba(0,0,0,.3);
+      --sidebar-bg: #1e293b; --input-bg: #0f172a;
+    }
+    body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); direction: rtl; transition: background .3s, color .3s; }
+    .hidden { display: none !important; }
+
+    /* ============ Logo ============ */
+    .logo-svg { width: 40px; height: 40px; }
+
+    /* ============ Login ============ */
+    .login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #e8eef7, #d4dfef); padding: 20px;
+      transition: background .3s;
+    }
+    [data-theme="dark"] .login-screen { background: linear-gradient(135deg, #0f172a, #1e293b); }
+    .login-card {
+      background: var(--card); padding: 40px; border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.12); text-align: center; max-width: 420px; width: 100%;
+      animation: slideUp .5s ease;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .login-card .logo-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
+    .login-card .logo-svg { width: 80px; height: 80px; }
+    .login-card h1 { margin-bottom: 8px; color: var(--primary); font-size: 26px; }
+    .login-card p { color: var(--muted); margin-bottom: 28px; font-size: 14px; }
+
+    .btn-google {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 13px; border: 1.5px solid var(--border);
+      background: var(--card); color: var(--text); border-radius: 10px; font-family: inherit;
+      font-size: 15px; font-weight: 500; cursor: pointer; transition: .2s; margin-bottom: 16px;
+    }
+    .btn-google:hover { background: var(--input-bg); transform: translateY(-1px); }
+    .btn-google:disabled { opacity: .6; cursor: not-allowed; }
+
+    .divider { display: flex; align-items: center; margin: 20px 0; color: var(--muted); font-size: 13px; }
+    .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+    .divider span { padding: 0 12px; }
+
+    .form-group { margin-bottom: 14px; text-align: right; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; }
+    .form-group label .req { color: var(--danger); }
+    .form-group label .opt { color: var(--muted); font-size: 12px; font-weight: 400; }
+    .form-control {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-family: inherit; font-size: 14px; background: var(--input-bg);
+      color: var(--text); transition: .2s;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); background: var(--card); box-shadow: 0 0 0 3px rgba(44,95,138,.1); }
+    textarea.form-control { min-height: 70px; resize: vertical; }
+
+    .btn-email {
+      width: 100%; padding: 13px; background: var(--primary); color: #fff;
+      border: none; border-radius: 10px; font-family: inherit; font-size: 15px;
+      font-weight: 600; cursor: pointer; transition: .2s; margin-top: 8px;
+    }
+    .btn-email:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-email:disabled { opacity: .6; cursor: not-allowed; }
+
+    .signup-link { text-align: center; margin-top: 16px; font-size: 14px; color: var(--muted); }
+    .signup-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .signup-link a:hover { text-decoration: underline; }
+
+    /* ============ App Layout ============ */
+    .app { display: flex; min-height: 100vh; }
+    .app.layout-top { flex-direction: column; }
+    .app.layout-side { flex-direction: row; }
+
+    .sidebar {
+      background: var(--sidebar-bg); border-bottom: 1px solid var(--border);
+      padding: 10px 16px; display: flex; flex-direction: row; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 900; flex-wrap: wrap;
+      transition: background .3s;
+    }
+    .layout-top .sidebar { width: 100%; border-left: none; }
+    .layout-side .sidebar {
+      width: 250px; height: 100vh; flex-direction: column; align-items: stretch;
+      border-left: 1px solid var(--border); border-bottom: none; position: sticky; top: 0;
+      padding: 20px; gap: 20px; flex-shrink: 0;
+    }
+
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand-name { font-size: 15px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+
+    .nav { display: flex; flex-direction: row; gap: 6px; flex: 1; overflow-x: auto; scrollbar-width: none; }
+    .nav::-webkit-scrollbar { display: none; }
+    .layout-side .nav { flex-direction: column; overflow-x: visible; flex: 1; }
+    .nav-link {
+      padding: 8px 12px; border-radius: 10px; color: var(--text);
+      text-decoration: none; font-size: 13px; transition: all .2s; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; white-space: nowrap;
+    }
+    .nav-link:hover { background: var(--input-bg); }
+    .nav-link.active { background: var(--primary); color: #fff; }
+
+    .user-box { display: flex; align-items: center; gap: 8px; }
+    .layout-top .user-box { margin-right: auto; }
+    .layout-side .user-box { padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
+    .user-box img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--input-bg); }
+    .user-name { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; }
+    .btn-link { background: none; border: none; color: var(--danger); cursor: pointer; font-family: inherit; font-size: 12px; padding: 0; }
+
+    .theme-toggle {
+      background: var(--input-bg); border: 1px solid var(--border);
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
+      transition: .2s; flex-shrink: 0;
+    }
+    .theme-toggle:hover { transform: rotate(20deg); }
+
+    .main { flex: 1; padding: 20px; min-width: 0; overflow-x: hidden; width: 100%; }
+    .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar h2 { font-size: 20px; color: var(--primary); }
+
+    /* ============ Pages ============ */
+    .page { display: none; }
+    .page.active { display: block; animation: pageIn .25s ease; }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============ Cards ============ */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--card); padding: 20px; border-radius: var(--radius);
+      box-shadow: var(--shadow); border-right: 4px solid var(--primary);
+      transition: transform .2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: var(--primary); }
+    .stat-card.warning { border-right-color: var(--warning); }
+    .stat-card.warning .value { color: var(--warning); }
+
+    .section-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px; animation: cardIn .3s ease; }
+    @keyframes cardIn { from { opacity: 0; } to { opacity: 1; } }
+    .section-card h3 { margin-bottom: 16px; color: var(--primary); font-size: 17px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+    /* ============ Buttons ============ */
+    .btn {
+      padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer;
+      font-family: inherit; font-size: 14px; font-weight: 500; transition: all .2s;
+      display: inline-flex; align-items: center; gap: 6px; justify-content: center;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { opacity: .9; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: var(--input-bg); }
+    .btn-sm { padding: 7px 13px; font-size: 13px; }
+
+    /* ============ Table ============ */
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; text-align: right; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .table th { background: var(--input-bg); color: var(--muted); font-weight: 600; font-size: 12px; }
+    .table tr:hover td { background: var(--input-bg); }
+
+    .low-stock { background: rgba(234,88,12,.08); }
+    .low-stock td { color: var(--warning); }
+    .low-badge {
+      display: inline-block; background: var(--warning); color: #fff;
+      padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-right: 6px;
+    }
+
+    /* ============ Warehouse Cards ============ */
+    .wh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .wh-card {
+      background: var(--card); padding: 20px; border-radius: var(--radius);
+      box-shadow: var(--shadow); transition: all .25s; border: 1px solid var(--border);
+    }
+    .wh-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,.1); }
+    .wh-card .icon { font-size: 32px; margin-bottom: 8px; }
+    .wh-card h4 { color: var(--primary); margin-bottom: 4px; }
+    .wh-card p { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+
+    /* ============ Toast ============ */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--text); color: #fff; padding: 13px 24px; border-radius: 10px;
+      font-size: 14px; opacity: 0; transition: all .3s; z-index: 2000;
+      box-shadow: 0 8px 30px rgba(0,0,0,.2);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.warning { background: var(--warning); }
+
+    /* ============ Modal ============ */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1500; padding: 20px; animation: fadeIn .2s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-content {
+      background: var(--card); border-radius: 16px; max-width: 520px; width: 100%;
+      max-height: 90vh; overflow-y: auto; padding: 24px;
+      animation: popIn .3s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-header h3 { color: var(--primary); font-size: 18px; }
+    .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); }
+
+    /* ============ Search ============ */
+    .result-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; animation: cardIn .3s ease; }
+    .result-card .header { display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+    .result-card .name { font-weight: 700; color: var(--primary); font-size: 16px; }
+    .result-card .price { color: var(--success); font-weight: 600; }
+    .result-card .wh-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .wh-badge { background: var(--input-bg); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border); }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* ============ Skeleton ============ */
+    .skeleton { background: linear-gradient(90deg, var(--border) 25%, var(--input-bg) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skeleton-card { height: 120px; margin-bottom: 12px; }
+
+    /* ============ Spinner ============ */
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-left: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ============ Searchable dropdown ============ */
+    .searchable { position: relative; }
+    .searchable-list { max-height: 200px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 10px; background: var(--card); display: none; margin-top: 4px; }
+    .searchable-list.open { display: block; animation: popIn .2s ease; }
+    .searchable-item { padding: 11px 14px; cursor: pointer; font-size: 14px; border-bottom: 1px solid var(--border); }
+    .searchable-item:last-child { border-bottom: none; }
+    .searchable-item:hover { background: var(--input-bg); }
+    .searchable-item .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ============ Filter chips ============ */
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip { padding: 7px 14px; border-radius: 20px; background: var(--input-bg); border: 1.5px solid var(--border); cursor: pointer; font-size: 13px; font-family: inherit; color: var(--text); transition: .2s; }
+    .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* ============ Install Banner ============ */
+    .install-banner {
+      position: fixed; bottom: 20px; right: 20px; background: var(--card);
+      border: 1px solid var(--border); padding: 14px 18px; border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.15); z-index: 800;
+      display: flex; align-items: center; gap: 12px; max-width: 340px;
+      animation: slideUp .5s ease;
+    }
+    .install-banner button { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .install-banner .accept { background: var(--primary); color: #fff; }
+    .install-banner .dismiss { background: transparent; color: var(--muted); }
+
+    /* ============ Recent logs ============ */
+    .recent-log { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; gap: 12px; flex-wrap: wrap; }
+    .recent-log:last-child { border-bottom: none; }
+    .recent-log .action { font-weight: 600; color: var(--primary); }
+    .recent-log .time { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+    /* ============ Camera Scanner (Small Hole-Punch) ============ */
+    .camera-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 3000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .camera-overlay.hidden { display: none; }
+    
+    /* إطار الكاميرا الصغير */
+    .camera-box {
+      position: relative; width: 85%; max-width: 320px; aspect-ratio: 4/3;
+      border-radius: 20px; overflow: hidden;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,.85), 0 0 30px rgba(0,0,0,.5);
+      background: #000;
+    }
+    /* مكتبة html5-qrcode تضع الفيديو هنا */
+    #reader {
+      width: 100% !important; height: 100% !important;
+      border: none !important;
+    }
+    #reader video {
+      width: 100% !important; height: 100% !important; object-fit: cover;
+    }
+    /* إخفاء عناصر المكتبة الافتراضية */
+    #reader__dashboard_section_csr { display: none !important; }
+    #reader__header_message { display: none !important; }
+    #reader__scan_region { border: none !important; }
+    #reader__scan_region img { display: none !important; }
+    #reader__dashboard { padding: 0 !important; background: transparent !important; }
+
+    /* زوايا الإطار الذهبية */
+    .camera-corner {
+      position: absolute; width: 30px; height: 30px; border: 4px solid var(--accent); z-index: 10;
+    }
+    .camera-corner.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; border-top-left-radius: 12px; }
+    .camera-corner.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; border-top-right-radius: 12px; }
+    .camera-corner.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; border-bottom-left-radius: 12px; }
+    .camera-corner.br { bottom: 10px; right: 10px; border-left: none; border-top: none; border-bottom-right-radius: 12px; }
+    
+    /* خط المسح المتحرك */
+    .camera-scanline {
+      position: absolute; left: 10%; right: 10%; height: 2px;
+      background: var(--accent); box-shadow: 0 0 10px var(--accent);
+      top: 50%; animation: scanline 2s linear infinite; z-index: 10;
+    }
+    @keyframes scanline {
+      0% { top: 15%; }
+      50% { top: 85%; }
+      100% { top: 15%; }
+    }
+
+    .camera-hint {
+      position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
+      color: #fff; text-align: center; font-size: 14px; background: rgba(0,0,0,.6);
+      padding: 8px 16px; border-radius: 20px; white-space: nowrap; z-index: 10;
+    }
+    .camera-close {
+      position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,.25);
+      border: none; color: #fff; width: 48px; height: 48px; border-radius: 50%;
+      font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      z-index: 10; backdrop-filter: blur(4px);
+    }
+    .camera-manual-btn {
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--primary); color: #fff; border: none; padding: 10px 20px;
+      border-radius: 20px; font-family: inherit; font-size: 14px; cursor: pointer; z-index: 10;
+    }
+
+    /* ============ Settings ============ */
+    .settings-group { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .settings-group:last-child { border-bottom: none; }
+    .settings-group h4 { color: var(--primary); font-size: 15px; margin-bottom: 12px; }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; gap: 12px; flex-wrap: wrap; }
+    .setting-row .label { font-size: 14px; }
+    .setting-row .desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .setting-toggle {
+      width: 44px; height: 24px; border-radius: 12px; background: var(--border);
+      border: none; cursor: pointer; position: relative; transition: .2s; flex-shrink: 0;
+    }
+    .setting-toggle.on { background: var(--primary); }
+    .setting-toggle::after {
+      content: ''; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px;
+      border-radius: 50%; background: #fff; transition: .2s;
+    }
+    .setting-toggle.on::after { right: 22px; }
+
+    /* ============ Responsive ============ */
+    @media (max-width: 900px) {
+      .main { padding: 16px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+
+    /* ============ Print ============ */
+    @media print {
+      .sidebar, .topbar, .no-print, .install-banner { display: none !important; }
+      .main { padding: 0; }
+      body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ Login Screen ============ -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="logo-wrap">
+        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2c5f8a"/>
+              <stop offset="100%" stop-color="#1e4468"/>
+            </linearGradient>
+            <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#c9a227"/>
+              <stop offset="100%" stop-color="#8b6914"/>
+            </linearGradient>
+          </defs>
+          <path d="M20 35 L50 20 L80 35 L80 75 L50 90 L20 75 Z" fill="url(#lg1)"/>
+          <path d="M20 35 L50 20 L80 35 L50 50 Z" fill="url(#lg2)"/>
+          <path d="M50 50 L50 90" stroke="#8b6914" stroke-width="1.5" opacity="0.5"/>
+          <path d="M65 30 Q75 30 75 40" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <polygon points="75,40 72,35 78,35" fill="#fff"/>
+          <path d="M35 70 Q25 70 25 60" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <polygon points="25,60 28,65 22,65" fill="#fff"/>
+        </svg>
+      </div>
+      <h1>إدارة المستودعات</h1>
+      <p>سجّل الدخول للبدء</p>
+
+      <button id="google-login-btn" class="btn-google">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.4l-6.5-5.5c-2 1.5-4.6 2.4-7.5 2.4-5.2 0-9.6-3.3-11.2-7.9l-6.5 5C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.5 5.5C41.4 36.1 44 30.5 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+        تسجيل الدخول بـ Google
+      </button>
+
+      <div class="divider"><span>أو</span></div>
+
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="login-email" class="form-control" placeholder="example@mail.com" />
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="login-password" class="form-control" placeholder="********" />
+      </div>
+      <button id="email-login-btn" class="btn-email">تسجيل الدخول</button>
+
+      <div class="signup-link">
+        ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a>
+      </div>
+
+      <button id="theme-toggle-login" class="theme-toggle" style="position:absolute;top:16px;left:16px" title="تبديل الوضع">🌙</button>
+    </div>
+  </div>
+
+  <!-- ============ Main App ============ -->
+  <div id="app" class="app layout-top hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 35 L50 20 L80 35 L80 75 L50 90 L20 75 Z" fill="#2c5f8a"/>
+          <path d="M20 35 L50 20 L80 35 L50 50 Z" fill="#c9a227"/>
+          <path d="M50 50 L50 90" stroke="#8b6914" stroke-width="1.5" opacity="0.5"/>
+          <path d="M65 30 Q75 30 75 40" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <polygon points="75,40 72,35 78,35" fill="#fff"/>
+          <path d="M35 70 Q25 70 25 60" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <polygon points="25,60 28,65 22,65" fill="#fff"/>
+        </svg>
+        <span class="brand-name">المستودعات</span>
+      </div>
+      <nav class="nav">
+        <a class="nav-link active" data-page="dashboard">🏠 الرئيسية</a>
+        <a class="nav-link" data-page="warehouses">🏬 المستودعات</a>
+        <a class="nav-link" data-page="search">🔍 البحث</a>
+        <a class="nav-link" data-page="transfer">🔄 نقل البضاعة</a>
+        <a class="nav-link" data-page="logs">📋 سجل العمليات</a>
+        <a class="nav-link" data-page="alerts">🔔 التنبيهات</a>
+        <a class="nav-link" data-page="settings">⚙️ الإعدادات</a>
+      </nav>
+      <div class="user-box">
+        <img id="user-avatar" src="" alt="" />
+        <div style="flex:1">
+          <div id="user-name" class="user-name"></div>
+          <button id="logout-btn" class="btn-link">خروج</button>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" title="تبديل الوضع">🌙</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 id="page-title">الرئيسية</h2>
+        </div>
+      </header>
+
+      <section id="page-dashboard" class="page active"></section>
+      <section id="page-warehouses" class="page"></section>
+      <section id="page-warehouse-detail" class="page"></section>
+      <section id="page-search" class="page"></section>
+      <section id="page-transfer" class="page"></section>
+      <section id="page-logs" class="page"></section>
+      <section id="page-alerts" class="page"></section>
+      <section id="page-settings" class="page"></section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title"></h3>
+        <button class="modal-close" onclick="document.getElementById('modal').classList.add('hidden')">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Camera Overlay (Small Hole-Punch) -->
+  <div id="camera-overlay" class="camera-overlay hidden">
+    <button class="camera-close" id="camera-close">✕</button>
+    <div class="camera-box">
+      <div id="reader"></div>
+      <div class="camera-corner tl"></div>
+      <div class="camera-corner tr"></div>
+      <div class="camera-corner bl"></div>
+      <div class="camera-corner br"></div>
+      <div class="camera-scanline"></div>
+    </div>
+    <div class="camera-hint">ضع الباركود داخل الإطار</div>
+  </div>
+
+  <!-- Install Banner -->
+  <div id="install-banner" class="install-banner hidden">
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:14px;margin-bottom:2px">تثبيت التطبيق</div>
+      <div style="font-size:12px;color:var(--muted)">استخدم التطبيق مباشرة من شاشتك الرئيسية</div>
+    </div>
+    <button class="accept" id="install-accept">تثبيت</button>
+    <button class="dismiss" id="install-dismiss">✕</button>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script type="module">
+    // ============================================
+    // Firebase Config
+    // ============================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyC2h5xglOIfzWStVSEAxaJ4iA4Nlb_mmZE",
+      authDomain: "storehouse-e8a29.firebaseapp.com",
+      projectId: "storehouse-e8a29",
+      storageBucket: "storehouse-e8a29.firebasestorage.app",
+      messagingSenderId: "129183410595",
+      appId: "1:129183410595:web:52552e61c1c4aad9c5d216",
+      measurementId: "G-EKWSP2HJGJ"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, signInWithEmailAndPassword, updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc,
+      query, orderBy, serverTimestamp, runTransaction, limit, where
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let currentWarehouseId = null;
+    let html5QrCode = null;
+
+    // ============================================
+    // Helpers
+    // ============================================
+    const $ = (s) => document.querySelector(s);
+    const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
+    const fmtDate = (ts) => { if (!ts) return "-"; const d = ts.toDate ? ts.toDate() : new Date(ts); return d.toLocaleString("ar-EG", { dateStyle: "short", timeStyle: "short" }); };
+    const fmtMoney = (n) => {
+      if (n === null || n === undefined || n === "" || Number(n) === 0) return "—";
+      return Number(n).toLocaleString("ar-EG") + " ج.م";
+    };
+    const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+    function showToast(msg, type = "") {
+      const t = $("#toast");
+      t.textContent = msg;
+      t.className = "toast show " + type;
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.className = "toast"; }, 3000);
+    }
+    function openModal(title, html) {
+      $("#modal-title").textContent = title;
+      $("#modal-body").innerHTML = html;
+      $("#modal").classList.remove("hidden");
+    }
+    function closeModal() { $("#modal").classList.add("hidden"); }
+
+    function setLoading(btn, loading, textWhenLoading = "جارٍ الحفظ...") {
+      if (!btn) return;
+      if (loading) {
+        btn.disabled = true;
+        btn.dataset.original = btn.innerHTML;
+        btn.innerHTML = `<span class="spinner"></span> ${textWhenLoading}`;
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.original || btn.innerHTML;
+      }
+    }
+
+    // ============================================
+    // Barcode Scanner (via html5-qrcode)
+    // ============================================
+    function stopCamera() {
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          html5QrCode.clear();
+          html5QrCode = null;
+        }).catch(() => {});
+      }
+      $("#camera-overlay").classList.add("hidden");
+    }
+
+    function startBarcodeScan(callback) {
+      const overlay = $("#camera-overlay");
+      overlay.classList.remove("hidden");
+
+      $("#camera-close").onclick = () => stopCamera();
+
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 150 },
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.CODABAR,
+          Html5QrcodeSupportedFormats.ITF
+        ]
+      };
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+          stopCamera();
+          callback(decodedText);
+        },
+        () => {} // ignore errors
+      ).catch(err => {
+        showToast("تعذر فتح الكاميرا: " + err, "error");
+        stopCamera();
+      });
+    }
+
+    // ============================================
+    // Theme & Layout
+    // ============================================
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      document.querySelectorAll("#theme-toggle, #theme-toggle-login").forEach(b => {
+        b.textContent = theme === "dark" ? "☀️" : "🌙";
+      });
+      localStorage.setItem("theme", theme);
+    }
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+
+    function applyLayout(layout) {
+      const app = $("#app");
+      if (!app) return;
+      app.classList.remove("layout-top", "layout-side");
+      app.classList.add(layout === "side" ? "layout-side" : "layout-top");
+      localStorage.setItem("layout", layout);
+    }
+    const savedLayout = localStorage.getItem("layout") || "top";
+    applyLayout(savedLayout);
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute("data-theme");
+      applyTheme(current === "dark" ? "light" : "dark");
+    }
+    document.addEventListener("click", (e) => {
+      if (e.target.id === "theme-toggle" || e.target.id === "theme-toggle-login") toggleTheme();
+    });
+
+    // ============================================
+    // Firestore Data Layer
+    // ============================================
+    const whCol = () => collection(db, "users", currentUser.uid, "warehouses");
+    const logCol = () => collection(db, "users", currentUser.uid, "logs");
+    const itemsCol = (whId) => collection(db, "users", currentUser.uid, "warehouses", whId, "items");
+
+    async function addLog(action, details) {
+      await addDoc(logCol(), { action, details, createdAt: serverTimestamp() });
+    }
+    async function createWarehouse(name) {
+      await addDoc(whCol(), { name, createdAt: serverTimestamp() });
+      await addLog("إضافة مستودع", `إنشاء: ${name}`);
+    }
+    async function getWarehouses() {
+      const snap = await getDocs(query(whCol(), orderBy("createdAt", "asc")));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    async function getWarehouse(id) {
+      const s = await getDoc(doc(whCol(), id));
+      return s.exists() ? { id: s.id, ...s.data() } : null;
+    }
+    async function deleteWarehouse(id, name) {
+      await deleteDoc(doc(whCol(), id));
+      await addLog("حذف مستودع", `حذف: ${name}`);
+    }
+    async function renameWarehouse(id, newName, oldName) {
+      await updateDoc(doc(whCol(), id), { name: newName });
+      await addLog("تعديل مستودع", `${oldName} → ${newName}`);
+    }
+    async function addItem(whId, whName, data) {
+      await addDoc(itemsCol(whId), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      await addLog("إضافة صنف", `"${data.name}" (${data.quantity}) في ${whName}`);
+    }
+    async function getItems(whId) {
+      const snap = await getDocs(query(itemsCol(whId), orderBy("createdAt", "desc")));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    async function deleteItem(whId, itemId, name, whName) {
+      await deleteDoc(doc(itemsCol(whId), itemId));
+      await addLog("حذف صنف", `"${name}" من ${whName}`);
+    }
+    async function updateItem(whId, itemId, data, changeDesc, itemName) {
+      await updateDoc(doc(itemsCol(whId), itemId), { ...data, updatedAt: serverTimestamp() });
+      await addLog("تعديل صنف", `"${itemName}": ${changeDesc}`);
+    }
+    async function getLogs(max = 200, filter = {}) {
+      let q = query(logCol(), orderBy("createdAt", "desc"));
+      if (filter.limit) q = query(logCol(), orderBy("createdAt", "desc"), limit(filter.limit));
+      const snap = await getDocs(q);
+      let logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (filter.action) logs = logs.filter(l => l.action === filter.action);
+      if (filter.since) logs = logs.filter(l => l.createdAt && l.createdAt.toDate() >= filter.since);
+      return logs;
+    }
+    async function getRecentLogs(max = 5) { return getLogs(max, { limit: max }); }
+
+    async function aggregateByName(term) {
+      const whSnap = await getDocs(whCol());
+      const map = new Map();
+      for (const whDoc of whSnap.docs) {
+        const wh = { id: whDoc.id, ...whDoc.data() };
+        const iSnap = await getDocs(itemsCol(wh.id));
+        iSnap.forEach(i => {
+          const it = i.data();
+          if ((it.name || "").toLowerCase().includes(term.toLowerCase()) || (it.barcode && it.barcode === term)) {
+            const key = it.name.trim().toLowerCase();
+            if (!map.has(key)) map.set(key, { name: it.name, price: it.price, totalQty: 0, perWarehouse: [] });
+            const e = map.get(key);
+            e.totalQty += Number(it.quantity) || 0;
+            e.perWarehouse.push({ whId: wh.id, whName: wh.name, qty: it.quantity, minQty: it.minQuantity || 0 });
+          }
+        });
+      }
+      return Array.from(map.values());
+    }
+
+    async function getLowStockItems() {
+      const whSnap = await getDocs(whCol());
+      const low = [];
+      for (const whDoc of whSnap.docs) {
+        const wh = { id: whDoc.id, ...whDoc.data() };
+        const iSnap = await getDocs(itemsCol(wh.id));
+        iSnap.forEach(i => {
+          const it = { id: i.id, ...i.data(), warehouseName: wh.name, warehouseId: wh.id };
+          if (it.minQuantity && Number(it.quantity) <= Number(it.minQuantity)) low.push(it);
+        });
+      }
+      return low;
+    }
+
+    async function transferStock({ fromWhId, toWhId, itemName, qty }) {
+      if (fromWhId === toWhId) throw new Error("لا يمكن النقل لنفس المستودع");
+      qty = Number(qty);
+      if (!qty || qty <= 0) throw new Error("الكمية يجب أن تكون أكبر من صفر");
+
+      const srcSnap = await getDocs(itemsCol(fromWhId));
+      let srcDoc = null;
+      const target = itemName.trim().toLowerCase();
+      srcSnap.forEach(d => { if ((d.data().name || "").trim().toLowerCase() === target) srcDoc = { id: d.id, ...d.data() }; });
+      if (!srcDoc) throw new Error("الصنف غير موجود في المصدر");
+      if (Number(srcDoc.quantity) < qty) throw new Error(`الكمية غير كافية (متوفر: ${srcDoc.quantity})`);
+
+      const dstSnap = await getDocs(itemsCol(toWhId));
+      let dstDoc = null;
+      dstSnap.forEach(d => { if ((d.data().name || "").trim().toLowerCase() === target) dstDoc = { id: d.id, ...d.data() }; });
+
+      const srcRef = doc(db, "users", currentUser.uid, "warehouses", fromWhId, "items", srcDoc.id);
+      const dstRef = dstDoc ? doc(db, "users", currentUser.uid, "warehouses", toWhId, "items", dstDoc.id) : null;
+      const dstNewRef = !dstDoc ? doc(itemsCol(toWhId)) : null;
+
+      await runTransaction(db, async (tx) => {
+        const s = await tx.get(srcRef);
+        const cur = Number(s.data().quantity) || 0;
+        if (cur < qty) throw new Error("الكمية تغيّرت، أعد المحاولة");
+        tx.update(srcRef, { quantity: cur - qty, updatedAt: serverTimestamp() });
+        if (dstRef) {
+          const d = await tx.get(dstRef);
+          tx.update(dstRef, { quantity: (Number(d.data().quantity) || 0) + qty, updatedAt: serverTimestamp() });
+        } else {
+          tx.set(dstNewRef, {
+            name: srcDoc.name, price: srcDoc.price, quantity: qty,
+            description: srcDoc.description || "", imageUrl: srcDoc.imageUrl || "",
+            barcode: srcDoc.barcode || "",
+            minQuantity: srcDoc.minQuantity || 0,
+            createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+          });
+        }
+      });
+      await addLog("نقل بضاعة", `${qty} من "${itemName}"`);
+    }
+
+    // ============================================
+    // Auth
+    // ============================================
+    $("#google-login-btn").addEventListener("click", async () => {
+      const btn = $("#google-login-btn");
+      try {
+        setLoading(btn, true, "جارٍ الدخول...");
+        if (isMobile()) {
+          await signInWithRedirect(auth, googleProvider);
+        } else {
+          await signInWithPopup(auth, googleProvider);
+        }
+      } catch (e) {
+        if (e.code !== "auth/popup-closed-by-user") showToast("فشل: " + e.message, "error");
+        setLoading(btn, false);
+      }
+    });
+
+    getRedirectResult(auth).catch(e => {
+      if (e.code !== "auth/popup-closed-by-user") showToast("فشل: " + e.message, "error");
+    });
+
+    $("#email-login-btn").addEventListener("click", async () => {
+      const email = $("#login-email").value.trim();
+      const password = $("#login-password").value;
+      if (!email || !password) return showToast("أدخل البريد وكلمة المرور", "error");
+      const btn = $("#email-login-btn");
+      try {
+        setLoading(btn, true, "جارٍ الدخول...");
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (e) {
+        let msg = e.message;
+        if (['auth/user-not-found','auth/wrong-password','auth/invalid-credential'].includes(e.code)) msg = "البريد أو كلمة المرور غير صحيحة";
+        else if (e.code === 'auth/invalid-email') msg = "صيغة البريد غير صحيحة";
+        showToast("فشل: " + msg, "error");
+        setLoading(btn, false);
+      }
+    });
+
+    $("#logout-btn").addEventListener("click", () => signOut(auth));
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        $("#login-screen").classList.add("hidden");
+        $("#app").classList.remove("hidden");
+        $("#user-name").textContent = user.displayName || user.email || "مستخدم";
+        $("#user-avatar").src = user.photoURL || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%232c5f8a' width='40' height='40'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.35em' fill='white' font-size='18'%3E👤%3C/text%3E%3C/svg%3E";
+        applyLayout(localStorage.getItem("layout") || "top");
+        navigate("dashboard");
+      } else {
+        currentUser = null;
+        $("#login-screen").classList.remove("hidden");
+        $("#app").classList.add("hidden");
+      }
+    });
+
+    // ============================================
+    // Router
+    // ============================================
+    const pageTitles = {
+      dashboard: "الرئيسية", warehouses: "المستودعات", "warehouse-detail": "تفاصيل المستودع",
+      search: "البحث", transfer: "نقل البضاعة", logs: "سجل العمليات", alerts: "التنبيهات", settings: "الإعدادات"
+    };
+
+    function navigate(page, payload) {
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".nav-link").forEach(a => a.classList.remove("active"));
+      $("#page-title").textContent = pageTitles[page] || "";
+
+      if (page === "warehouse-detail") {
+        currentWarehouseId = payload;
+        renderWarehouseDetail(payload);
+        $("#page-warehouse-detail").classList.add("active");
+      } else {
+        const nav = document.querySelector(`.nav-link[data-page="${page}"]`);
+        if (nav) nav.classList.add("active");
+        $(`#page-${page}`).classList.add("active");
+        const pageEl = $(`#page-${page}`);
+        if (page === "dashboard") renderDashboard(pageEl);
+        if (page === "warehouses") renderWarehouses(pageEl);
+        if (page === "search") renderSearch(pageEl);
+        if (page === "transfer") renderTransfer(pageEl);
+        if (page === "logs") renderLogs(pageEl);
+        if (page === "alerts") renderAlerts(pageEl);
+        if (page === "settings") renderSettings(pageEl);
+      }
+    }
+    document.querySelectorAll(".nav-link").forEach(a => a.addEventListener("click", () => navigate(a.dataset.page)));
+    $("#menu-toggle")?.addEventListener("click", () => $(".sidebar").classList.toggle("open"));
+
+    // ============================================
+    // Dashboard (Fixed Unique Count)
+    // ============================================
+    async function renderDashboard(page) {
+      if (page.dataset.loaded === "1") return;
+      page.innerHTML = `<div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>`;
+      try {
+        const whs = await getWarehouses();
+        let totalQty = 0;
+        const uniqueItems = new Set(); // لحساب الأصناف الفريدة
+        
+        for (const wh of whs) {
+          const items = await getItems(wh.id);
+          items.forEach(it => {
+            totalQty += Number(it.quantity) || 0;
+            uniqueItems.add((it.name || "").trim().toLowerCase()); // إضافة اسم الصنف للمجموعة
+          });
+        }
+        const logs = await getRecentLogs(5);
+        const lowStock = await getLowStockItems();
+
+        page.innerHTML = `
+          <div class="stats-grid">
+            <div class="stat-card"><div class="label">المستودعات</div><div class="value">${whs.length}</div></div>
+            <div class="stat-card"><div class="label">إجمالي الأصناف الفريدة</div><div class="value">${uniqueItems.size}</div></div>
+            <div class="stat-card"><div class="label">إجمالي الكميات</div><div class="value">${totalQty}</div></div>
+            <div class="stat-card ${lowStock.length ? 'warning' : ''}"><div class="label">أصناف تحتاج تنبيه</div><div class="value">${lowStock.length}</div></div>
+          </div>
+
+          ${lowStock.length ? `
+          <div class="section-card" style="border-right:4px solid var(--warning)">
+            <h3>⚠️ تنبيه: أصناف قاربت على النفاد</h3>
+            ${lowStock.slice(0,5).map(it => `
+              <div class="recent-log">
+                <div><span class="action">${it.name}</span> في ${it.warehouseName} — متبقي: <b style="color:var(--warning)">${it.quantity}</b> (الحد: ${it.minQuantity})</div>
+              </div>
+            `).join("")}
+            ${lowStock.length > 5 ? `<div style="margin-top:8px"><button class="btn btn-outline btn-sm" onclick="document.querySelector('.nav-link[data-page=\\'alerts\\']').click()">عرض كل التنبيهات ←</button></div>` : ""}
+          </div>` : ""}
+
+          <div class="section-card">
+            <h3>🕒 آخر العمليات <button class="btn btn-outline btn-sm no-print" onclick="document.querySelector('.nav-link[data-page=\\'logs\\']').click()">عرض الكل ←</button></h3>
+            ${logs.length ? logs.map(l => `
+              <div class="recent-log">
+                <div><span class="action">${l.action}:</span> ${l.details}</div>
+                <div class="time">${fmtDate(l.createdAt)}</div>
+              </div>
+            `).join("") : `<div class="empty-state" style="padding:20px">لا عمليات بعد</div>`}
+          </div>
+        `;
+        page.dataset.loaded = "1";
+      } catch (e) {
+        page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`;
+      }
+    }
+
+    // ============================================
+    // Warehouses
+    // ============================================
+    async function renderWarehouses(page) {
+      page.dataset.loaded = "0";
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const whs = await getWarehouses();
+        page.innerHTML = `
+          <div class="section-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+              <h3 style="margin:0">🏬 المستودعات (${whs.length})</h3>
+              <button id="add-wh-btn" class="btn btn-primary">+ مستودع جديد</button>
+            </div>
+            <div class="wh-grid" id="wh-grid"></div>
+          </div>`;
+        $("#add-wh-btn").onclick = () => openAddWarehouseModal();
+        const grid = $("#wh-grid");
+        if (!whs.length) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🏬</div>لا مستودعات. أضف أول واحد.</div>`;
+          return;
+        }
+        for (const wh of whs) {
+          const items = await getItems(wh.id);
+          const totalQty = items.reduce((a, b) => a + (Number(b.quantity) || 0), 0);
+          const card = el("div", "wh-card", `
+            <div class="icon">📦</div>
+            <h4>${wh.name}</h4>
+            <p>${items.length} صنف • ${totalQty} قطعة</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-outline btn-sm open-btn">فتح</button>
+              <button class="btn btn-outline btn-sm rename-btn">تعديل</button>
+              <button class="btn btn-danger btn-sm del-btn">حذف</button>
+            </div>`);
+          card.querySelector(".open-btn").onclick = () => navigate("warehouse-detail", wh.id);
+          card.querySelector(".rename-btn").onclick = () => openRenameWarehouseModal(wh);
+          card.querySelector(".del-btn").onclick = () => openDeleteWarehouseModal(wh, items);
+          grid.appendChild(card);
+        }
+        page.dataset.loaded = "1";
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    function openAddWarehouseModal() {
+      openModal("إضافة مستودع", `
+        <div class="form-group"><label>اسم المستودع <span class="req">*</span></label>
+          <input id="wh-name" class="form-control" placeholder="مثال: مستودع رقم 1" /></div>
+        <button id="wh-save" class="btn btn-primary" style="width:100%">حفظ</button>`);
+      $("#wh-save").onclick = async () => {
+        const name = $("#wh-name").value.trim();
+        if (!name) return showToast("أدخل الاسم", "error");
+        const btn = $("#wh-save");
+        try {
+          setLoading(btn, true);
+          await createWarehouse(name);
+          closeModal(); showToast("تم الإنشاء", "success");
+          renderWarehouses($("#page-warehouses"));
+        } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+      };
+    }
+
+    function openRenameWarehouseModal(wh) {
+      openModal("تعديل الاسم", `
+        <div class="form-group"><label>الاسم الجديد</label>
+          <input id="wh-name" class="form-control" value="${wh.name}" /></div>
+        <button id="wh-save" class="btn btn-primary" style="width:100%">حفظ</button>`);
+      $("#wh-save").onclick = async () => {
+        const name = $("#wh-name").value.trim();
+        if (!name) return showToast("أدخل الاسم", "error");
+        const btn = $("#wh-save");
+        try {
+          setLoading(btn, true);
+          await renameWarehouse(wh.id, name, wh.name);
+          closeModal(); showToast("تم التعديل", "success");
+          renderWarehouses($("#page-warehouses"));
+        } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+      };
+    }
+
+    function openDeleteWarehouseModal(wh, items) {
+      openModal("حذف مستودع", `
+        <p>حذف <b>${wh.name}</b> وكل ${items.length} صنف؟</p>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button id="del-yes" class="btn btn-danger" style="flex:1">نعم، احذف</button>
+          <button onclick="document.getElementById('modal').classList.add('hidden')" class="btn btn-outline" style="flex:1">إلغاء</button>
+        </div>`);
+      $("#del-yes").onclick = async () => {
+        const btn = $("#del-yes");
+        try {
+          setLoading(btn, true, "جارٍ الحذف...");
+          for (const it of items) await deleteItem(wh.id, it.id, it.name, wh.name);
+          await deleteWarehouse(wh.id, wh.name);
+          closeModal(); showToast("تم الحذف", "success");
+          renderWarehouses($("#page-warehouses"));
+        } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+      };
+    }
+
+    // ============================================
+    // Warehouse Detail
+    // ============================================
+    async function renderWarehouseDetail(whId) {
+      const page = $("#page-warehouse-detail");
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const wh = await getWarehouse(whId);
+        if (!wh) { page.innerHTML = `<div class="empty-state">غير موجود</div>`; return; }
+        const items = await getItems(whId);
+
+        page.innerHTML = `
+          <div class="section-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+              <h3 style="margin:0">🏬 ${wh.name}</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap" class="no-print">
+                <button id="back-wh" class="btn btn-outline">← رجوع</button>
+                <button id="export-excel" class="btn btn-outline">📊 Excel</button>
+                <button id="export-pdf" class="btn btn-outline">📄 PDF</button>
+                <button id="add-item-btn" class="btn btn-primary">+ إضافة صنف</button>
+              </div>
+            </div>
+          </div>
+          <div class="section-card">
+            <h3>الأصناف (${items.length})</h3>
+            ${items.length ? `
+              <div style="overflow-x:auto" id="items-table-wrap">
+                <table class="table" id="items-table">
+                  <thead><tr><th>الصنف</th><th>الباركود</th><th>السعر</th><th>الكمية</th><th>الحد الأدنى</th><th>الوصف</th><th class="no-print">إجراءات</th></tr></thead>
+                  <tbody id="items-body"></tbody>
+                </table>
+              </div>` : `<div class="empty-state"><div class="icon">📦</div>لا أصناف</div>`}
+          </div>`;
+
+        $("#back-wh").onclick = () => navigate("warehouses");
+        $("#add-item-btn").onclick = () => openItemModal(wh, null);
+        $("#export-excel").onclick = () => exportWarehouseExcel(wh, items);
+        $("#export-pdf").onclick = () => exportWarehousePDF(wh, items);
+
+        const body = $("#items-body");
+        if (body) {
+          items.forEach(it => {
+            const isLow = it.minQuantity && Number(it.quantity) <= Number(it.minQuantity);
+            const tr = el("tr", isLow ? "low-stock" : "", `
+              <td><b>${it.name}</b>${isLow ? '<span class="low-badge">منخفض</span>' : ""}</td>
+              <td>${it.barcode || "-"}</td>
+              <td>${fmtMoney(it.price)}</td>
+              <td>${it.quantity}</td>
+              <td>${it.minQuantity || "—"}</td>
+              <td style="max-width:150px;color:var(--muted);font-size:12px">${it.description || "-"}</td>
+              <td style="white-space:nowrap" class="no-print">
+                <button class="btn btn-outline btn-sm edit-btn">تعديل</button>
+                <button class="btn btn-danger btn-sm del-btn">حذف</button>
+              </td>`);
+            tr.querySelector(".edit-btn").onclick = () => openItemModal(wh, it);
+            tr.querySelector(".del-btn").onclick = async () => {
+              if (!confirm(`حذف "${it.name}"؟`)) return;
+              try { await deleteItem(wh.id, it.id, it.name, wh.name); showToast("تم الحذف", "success"); renderWarehouseDetail(whId); }
+              catch (e) { showToast("فشل: " + e.message, "error"); }
+            };
+            body.appendChild(tr);
+          });
+        }
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    function openItemModal(wh, item) {
+      const isEdit = !!item;
+      openModal(isEdit ? "تعديل صنف" : "إضافة صنف", `
+        <div class="form-group"><label>اسم الصنف <span class="req">*</span></label>
+          <input id="it-name" class="form-control" value="${item?.name || ""}" /></div>
+        <div class="form-group"><label>الباركود <span class="opt">(اختياري)</span></label>
+          <div style="display:flex;gap:8px">
+            <input id="it-barcode" class="form-control" value="${item?.barcode || ""}" placeholder="امسح أو اكتب" />
+            <button id="scan-barcode-btn" class="btn btn-primary" style="white-space:nowrap">📷 كاميرا</button>
+          </div>
+        </div>
+        <div class="form-group"><label>السعر <span class="opt">(اختياري)</span></label>
+          <input id="it-price" type="number" min="0" step="0.01" class="form-control" value="${item?.price ?? ""}" /></div>
+        <div class="form-group"><label>الكمية <span class="req">*</span></label>
+          <input id="it-qty" type="number" min="0" step="1" class="form-control" value="${item?.quantity ?? ""}" /></div>
+        <div class="form-group"><label>الحد الأدنى للتنبيه <span class="opt">(اختياري)</span></label>
+          <input id="it-min" type="number" min="0" step="1" class="form-control" value="${item?.minQuantity ?? ""}" placeholder="تنبيه عند النقص" /></div>
+        <div class="form-group"><label>الوصف <span class="opt">(اختياري)</span></label>
+          <textarea id="it-desc" class="form-control">${item?.description || ""}</textarea></div>
+        <div class="form-group"><label>رابط الصورة <span class="opt">(اختياري)</span></label>
+          <input id="it-img" class="form-control" value="${item?.imageUrl || ""}" placeholder="https://..." /></div>
+        <button id="it-save" class="btn btn-primary" style="width:100%">حفظ</button>`);
+
+      $("#scan-barcode-btn").onclick = () => {
+        startBarcodeScan((code) => {
+          $("#it-barcode").value = code;
+          showToast("تم مسح الباركود", "success");
+        });
+      };
+
+      $("#it-save").onclick = async () => {
+        const name = $("#it-name").value.trim();
+        const barcode = $("#it-barcode").value.trim();
+        const priceRaw = $("#it-price").value.trim();
+        const qtyRaw = $("#it-qty").value.trim();
+        const minRaw = $("#it-min").value.trim();
+        if (!name) return showToast("أدخل الاسم", "error");
+        if (!qtyRaw) return showToast("أدخل الكمية", "error");
+        const price = priceRaw === "" ? null : Number(priceRaw);
+        const quantity = Number(qtyRaw);
+        const minQuantity = minRaw === "" ? 0 : Number(minRaw);
+        if (price !== null && (isNaN(price) || price < 0)) return showToast("سعر غير صحيح", "error");
+        if (isNaN(quantity) || quantity < 0) return showToast("كمية غير صحيحة", "error");
+        if (isNaN(minQuantity) || minQuantity < 0) return showToast("حد أدنى غير صحيح", "error");
+        const data = { name, barcode, price: price === null ? 0 : price, quantity, minQuantity,
+          description: $("#it-desc").value.trim(), imageUrl: $("#it-img").value.trim() };
+        const btn = $("#it-save");
+        try {
+          setLoading(btn, true);
+          if (isEdit) {
+            const changes = [];
+            if (data.quantity !== item.quantity) changes.push(`الكمية ${item.quantity}→${data.quantity}`);
+            if (data.price !== item.price) changes.push(`السعر ${item.price}→${data.price}`);
+            if (data.name !== item.name) changes.push(`الاسم`);
+            await updateItem(wh.id, item.id, data, changes.join(" | ") || "تحديث", item.name);
+          } else {
+            await addItem(wh.id, wh.name, data);
+          }
+          closeModal(); showToast("تم الحفظ", "success"); renderWarehouseDetail(wh.id);
+        } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+      };
+    }
+
+    // ============================================
+    // Export PDF via html2canvas (correct Arabic)
+    // ============================================
+    async function exportWarehousePDF(wh, items) {
+      showToast("جارٍ تجهيز PDF...", "success");
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "mm", "a4");
+
+      const wrap = document.createElement("div");
+      wrap.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:800px;background:#fff;padding:24px;font-family:'Tajawal',sans-serif;direction:rtl;";
+      wrap.innerHTML = `
+        <h1 style="text-align:center;color:#2c5f8a;margin-bottom:8px;font-size:22px">${wh.name}</h1>
+        <p style="text-align:center;color:#64748b;font-size:12px;margin-bottom:20px">${new Date().toLocaleString("ar-EG")}</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:#2c5f8a;color:#fff">
+              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الصنف</th>
+              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الباركود</th>
+              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">السعر</th>
+              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الكمية</th>
+              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الحد الأدنى</th>
+              <th style="padding:10px;border:1px solid #cbd5e1;text-align:right">الوصف</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(it => `
+              <tr>
+                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.name}</td>
+                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.barcode || "-"}</td>
+                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.price || "-"}</td>
+                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.quantity}</td>
+                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.minQuantity || "-"}</td>
+                <td style="padding:8px;border:1px solid #cbd5e1;text-align:right">${it.description || "-"}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>`;
+      document.body.appendChild(wrap);
+
+      try {
+        const canvas = await html2canvas(wrap, { scale: 2, backgroundColor: "#fff", useCORS: true });
+        const imgData = canvas.toDataURL("image/png");
+        const pdfW = 210;
+        const pdfH = (canvas.height * pdfW) / canvas.width;
+        let y = 0;
+        const pageH = 297;
+        if (pdfH <= pageH) {
+          doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+        } else {
+          let remaining = pdfH;
+          while (remaining > 0) {
+            doc.addImage(imgData, "PNG", 0, -y, pdfW, pdfH);
+            remaining -= pageH;
+            y += pageH;
+            if (remaining > 0) doc.addPage();
+          }
+        }
+        doc.save(`${wh.name}-${new Date().toISOString().slice(0,10)}.pdf`);
+        showToast("تم تصدير PDF", "success");
+      } catch (e) {
+        showToast("فشل PDF: " + e.message, "error");
+      } finally {
+        wrap.remove();
+      }
+    }
+
+    function exportWarehouseExcel(wh, items) {
+      const data = items.map(it => ({
+        "الصنف": it.name, "الباركود": it.barcode || "-", "السعر": it.price || "-", "الكمية": it.quantity,
+        "الحد الأدنى": it.minQuantity || "-", "الوصف": it.description || "-"
+      }));
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, wh.name.substring(0, 30));
+      XLSX.writeFile(wb, `${wh.name}-${new Date().toISOString().slice(0,10)}.xlsx`);
+      showToast("تم تصدير Excel", "success");
+    }
+
+    // ============================================
+    // Search
+    // ============================================
+    let lastSearchTerm = "";
+    function renderSearch(page) {
+      page.innerHTML = `
+        <div class="section-card">
+          <h3>🔍 البحث عن الأصناف</h3>
+          <div style="display:flex;gap:8px">
+            <input id="search-input" class="form-control" placeholder="اكتب اسم الصنف أو الباركود..." value="${lastSearchTerm}" />
+            <button id="scan-search-btn" class="btn btn-primary" style="white-space:nowrap">📷 كاميرا</button>
+          </div>
+        </div>
+        <div id="search-results"></div>`;
+      const input = $("#search-input");
+      let timer;
+      input.addEventListener("input", (e) => {
+        clearTimeout(timer);
+        lastSearchTerm = e.target.value.trim();
+        if (!lastSearchTerm) { $("#search-results").innerHTML = ""; return; }
+        timer = setTimeout(() => performSearch(lastSearchTerm), 300);
+      });
+      $("#scan-search-btn").onclick = () => {
+        startBarcodeScan((code) => {
+          lastSearchTerm = code;
+          input.value = code;
+          performSearch(code);
+        });
+      };
+      if (lastSearchTerm) performSearch(lastSearchTerm);
+    }
+
+    async function performSearch(term) {
+      const box = $("#search-results");
+      box.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const res = await aggregateByName(term);
+        if (!res.length) { box.innerHTML = `<div class="section-card"><div class="empty-state">لا نتائج لـ "${term}"</div></div>`; return; }
+        box.innerHTML = res.map(r => `
+          <div class="result-card">
+            <div class="header"><div class="name">${r.name}</div><div class="price">${fmtMoney(r.price)}</div></div>
+            <div>الإجمالي: <b>${r.totalQty}</b> قطعة</div>
+            <div class="wh-list">${r.perWarehouse.map(w => `<span class="wh-badge">${w.whName}: ${w.qty}</span>`).join("")}</div>
+          </div>`).join("");
+      } catch (e) { box.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    // ============================================
+    // Transfer
+    // ============================================
+    let transferState = { fromWhId: null, toWhId: null, itemName: null, items: [], warehouses: [] };
+
+    async function renderTransfer(page) {
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        transferState.warehouses = await getWarehouses();
+        transferState.fromWhId = null; transferState.toWhId = null;
+        transferState.itemName = null; transferState.items = [];
+        if (transferState.warehouses.length < 2) {
+          page.innerHTML = `<div class="section-card"><h3>🔄 نقل البضاعة</h3><div class="empty-state"><div class="icon">🏬</div>تحتاج مستودعين على الأقل<br><br><button class="btn btn-primary" onclick="document.querySelector('.nav-link[data-page=\\'warehouses\\']').click()">إدارة المستودعات ←</button></div></div>`;
+          return;
+        }
+        page.innerHTML = `
+          <div class="section-card">
+            <h3>🔄 نقل البضاعة</h3>
+            <div class="form-group"><label>1. المصدر <span class="req">*</span></label>
+              <div class="searchable"><input id="from-wh-search" class="form-control" placeholder="ابحث باسم المستودع..." /><div id="from-wh-list" class="searchable-list"></div></div></div>
+            <div class="form-group"><label>2. الصنف <span class="req">*</span></label>
+              <div class="searchable"><input id="item-search" class="form-control" placeholder="اختر المصدر أولاً" disabled /><div id="item-list" class="searchable-list"></div></div></div>
+            <div class="form-group"><label>3. الكمية <span class="req">*</span></label>
+              <input id="tr-qty" type="number" min="1" class="form-control" /></div>
+            <div class="form-group"><label>4. المستلم <span class="req">*</span></label>
+              <div class="searchable"><input id="to-wh-search" class="form-control" placeholder="ابحث باسم المستودع..." /><div id="to-wh-list" class="searchable-list"></div></div></div>
+            <button id="tr-btn" class="btn btn-primary" style="width:100%">تنفيذ النقل</button>
+          </div>`;
+        setupWarehouseSearch("from-wh-search", "from-wh-list", (wh) => {
+          transferState.fromWhId = wh ? wh.id : null;
+          transferState.itemName = null;
+          $("#item-search").value = ""; $("#item-search").disabled = !wh;
+          loadItemsForSource(wh);
+        });
+        setupWarehouseSearch("to-wh-search", "to-wh-list", (wh) => { transferState.toWhId = wh ? wh.id : null; });
+        $("#tr-btn").onclick = async () => {
+          const qty = $("#tr-qty").value.trim();
+          if (!transferState.fromWhId) return showToast("اختر المصدر", "error");
+          if (!transferState.itemName) return showToast("اختر الصنف", "error");
+          if (!qty || Number(qty) <= 0) return showToast("أدخل كمية", "error");
+          if (!transferState.toWhId) return showToast("اختر المستلم", "error");
+          if (transferState.fromWhId === transferState.toWhId) return showToast("نفس المستودع!", "error");
+          const btn = $("#tr-btn");
+          try {
+            setLoading(btn, true, "جارٍ النقل...");
+            await transferStock({ fromWhId: transferState.fromWhId, toWhId: transferState.toWhId, itemName: transferState.itemName, qty });
+            showToast("تم النقل بنجاح", "success");
+            renderTransfer($("#page-transfer"));
+          } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+        };
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    function setupWarehouseSearch(inputId, listId, onSelect) {
+      const input = $("#" + inputId); const list = $("#" + listId);
+      if (!input || !list) return;
+      const render = (filterText = "") => {
+        const filtered = transferState.warehouses.filter(w => w.name.toLowerCase().includes(filterText.toLowerCase()));
+        list.innerHTML = filtered.length ? filtered.map(w => `<div class="searchable-item" data-id="${w.id}">${w.name}</div>`).join("")
+          : `<div class="searchable-item" style="cursor:default;color:var(--muted)">لا نتائج</div>`;
+        list.classList.add("open");
+        list.querySelectorAll(".searchable-item[data-id]").forEach(item => {
+          item.onclick = () => {
+            const wh = transferState.warehouses.find(w => w.id === item.dataset.id);
+            input.value = wh.name; list.classList.remove("open"); onSelect(wh);
+          };
+        });
+      };
+      input.addEventListener("focus", () => render(input.value));
+      input.addEventListener("input", () => { render(input.value); onSelect(null); });
+      input.addEventListener("blur", () => setTimeout(() => list.classList.remove("open"), 200));
+    }
+
+    async function loadItemsForSource(wh) {
+      const itemInput = $("#item-search"); const itemList = $("#item-list");
+      if (!wh) { itemInput.value = ""; itemInput.disabled = true; itemInput.placeholder = "اختر المصدر أولاً"; itemList.innerHTML = ""; return; }
+      itemInput.disabled = false; itemInput.placeholder = "ابحث باسم الصنف...";
+      try {
+        transferState.items = await getItems(wh.id);
+        renderItemList(transferState.items.filter(i => Number(i.quantity) > 0));
+      } catch (e) { showToast("فشل تحميل الأصناف", "error"); }
+    }
+
+    function renderItemList(items) {
+      const itemInput = $("#item-search"); const itemList = $("#item-list");
+      const term = itemInput.value.trim().toLowerCase();
+      const filtered = items.filter(i => i.name.toLowerCase().includes(term) || (i.barcode && i.barcode === term));
+      itemList.innerHTML = filtered.length ? filtered.map(i => `<div class="searchable-item" data-name="${i.name}">${i.name}<div class="meta">المتوفر: ${i.quantity}${i.barcode ? " • باركود: " + i.barcode : ""}</div></div>`).join("")
+        : `<div class="searchable-item" style="cursor:default;color:var(--muted)">لا نتائج</div>`;
+      itemList.classList.add("open");
+      itemList.querySelectorAll(".searchable-item[data-name]").forEach(el => {
+        el.onclick = () => { transferState.itemName = el.dataset.name; itemInput.value = el.dataset.name; itemList.classList.remove("open"); };
+      });
+    }
+    document.addEventListener("input", (e) => { if (e.target.id === "item-search" && transferState.fromWhId) renderItemList(transferState.items.filter(i => Number(i.quantity) > 0)); });
+    document.addEventListener("focusin", (e) => { if (e.target.id === "item-search" && transferState.fromWhId) renderItemList(transferState.items.filter(i => Number(i.quantity) > 0)); });
+    document.addEventListener("focusout", (e) => { if (e.target.id === "item-search") setTimeout(() => $("#item-list")?.classList.remove("open"), 200); });
+
+    // ============================================
+    // Logs
+    // ============================================
+    let logsFilter = { action: null, since: null, sinceKey: null };
+    async function renderLogs(page) {
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const logs = await getLogs(500, logsFilter);
+        const actions = ["إضافة مستودع","حذف مستودع","تعديل مستودع","إضافة صنف","حذف صنف","تعديل صنف","نقل بضاعة"];
+        page.innerHTML = `
+          <div class="section-card">
+            <h3>📋 سجل العمليات (${logs.length})
+              <button id="export-logs-excel" class="btn btn-outline btn-sm no-print">📊 Excel</button>
+            </h3>
+            <div class="filter-chips">
+              <button class="chip ${!logsFilter.action && !logsFilter.sinceKey ? 'active' : ''}" data-filter="all">الكل</button>
+              <button class="chip ${logsFilter.sinceKey === 'today' ? 'active' : ''}" data-filter="today">اليوم</button>
+              <button class="chip ${logsFilter.sinceKey === 'week' ? 'active' : ''}" data-filter="week">هذا الأسبوع</button>
+              <button class="chip ${logsFilter.sinceKey === 'month' ? 'active' : ''}" data-filter="month">هذا الشهر</button>
+              ${actions.map(a => `<button class="chip ${logsFilter.action === a ? 'active' : ''}" data-action="${a}">${a}</button>`).join("")}
+            </div>
+            ${logs.length ? `<div style="overflow-x:auto"><table class="table">
+              <thead><tr><th>العملية</th><th>التفاصيل</th><th>الوقت</th></tr></thead>
+              <tbody>${logs.map(l => `<tr><td><b>${l.action}</b></td><td>${l.details}</td><td>${fmtDate(l.createdAt)}</td></tr>`).join("")}</tbody>
+            </table></div>` : `<div class="empty-state">لا عمليات</div>`}
+          </div>`;
+        page.querySelectorAll(".chip[data-filter]").forEach(c => c.onclick = () => {
+          const f = c.dataset.filter;
+          if (f === "all") { logsFilter = { action: logsFilter.action, since: null, sinceKey: null }; }
+          else {
+            const now = new Date();
+            const d = f === "today" ? new Date(now.setHours(0,0,0,0)) : f === "week" ? new Date(now.setDate(now.getDate()-7)) : new Date(now.setMonth(now.getMonth()-1));
+            logsFilter.since = d;
+            logsFilter.sinceKey = f;
+          }
+          renderLogs(page);
+        });
+        page.querySelectorAll(".chip[data-action]").forEach(c => c.onclick = () => {
+          logsFilter.action = logsFilter.action === c.dataset.action ? null : c.dataset.action;
+          renderLogs(page);
+        });
+        $("#export-logs-excel").onclick = () => {
+          const data = logs.map(l => ({ "العملية": l.action, "التفاصيل": l.details, "الوقت": fmtDate(l.createdAt) }));
+          const ws = XLSX.utils.json_to_sheet(data);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "العمليات");
+          XLSX.writeFile(wb, `logs-${new Date().toISOString().slice(0,10)}.xlsx`);
+          showToast("تم التصدير", "success");
+        };
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    // ============================================
+    // Alerts
+    // ============================================
+    async function renderAlerts(page) {
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const low = await getLowStockItems();
+        page.innerHTML = `
+          <div class="section-card">
+            <h3>🔔 تنبيهات نقص المخزون (${low.length})</h3>
+            ${low.length ? `<div style="overflow-x:auto"><table class="table">
+              <thead><tr><th>الصنف</th><th>المستودع</th><th>الكمية</th><th>الحد الأدنى</th><th>الحالة</th></tr></thead>
+              <tbody>${low.map(it => `<tr class="low-stock">
+                <td><b>${it.name}</b></td><td>${it.warehouseName}</td>
+                <td>${it.quantity}</td><td>${it.minQuantity}</td>
+                <td><span class="low-badge">قارب النفاد</span></td>
+              </tr>`).join("")}</tbody>
+            </table></div>` : `<div class="empty-state"><div class="icon">✅</div>لا تنبيهات، كل شيء على ما يرام</div>`}
+          </div>`;
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    // ============================================
+    // Settings
+    // ============================================
+    function renderSettings(page) {
+      const user = currentUser;
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      const layout = localStorage.getItem("layout") || "top";
+      page.innerHTML = `
+        <div class="section-card">
+          <h3>⚙️ الإعدادات</h3>
+
+          <div class="settings-group">
+            <h4>👤 تفاصيل الحساب</h4>
+            <div class="form-group"><label>الاسم</label>
+              <input id="set-name" class="form-control" value="${user.displayName || ""}" /></div>
+            <div class="form-group"><label>البريد الإلكتروني</label>
+              <input class="form-control" value="${user.email || ""}" disabled style="opacity:.7" /></div>
+            <button id="save-profile-btn" class="btn btn-primary">حفظ الاسم</button>
+          </div>
+
+          <div class="settings-group">
+            <h4>🔒 تغيير كلمة المرور</h4>
+            ${user.providerData.some(p => p.providerId === "password") ? `
+              <div class="form-group"><label>كلمة المرور الحالية</label>
+                <input id="set-old-pass" type="password" class="form-control" placeholder="********" /></div>
+              <div class="form-group"><label>كلمة المرور الجديدة</label>
+                <input id="set-new-pass" type="password" class="form-control" placeholder="6 أحرف على الأقل" /></div>
+              <button id="change-pass-btn" class="btn btn-primary">تغيير كلمة المرور</button>
+            ` : `<p style="color:var(--muted);font-size:13px">أنت مسجل عبر Google، لا يمكن تغيير كلمة المرور من هنا.</p>`}
+          </div>
+
+          <div class="settings-group">
+            <h4>🎨 المظهر</h4>
+            <div class="setting-row">
+              <div><div class="label">الوضع الليلي</div><div class="desc">تفعيل الخلفية الداكنة</div></div>
+              <button id="toggle-dark" class="setting-toggle ${isDark ? 'on' : ''}"></button>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h4>📐 وضع القائمة</h4>
+            <div class="setting-row">
+              <div><div class="label">القائمة العلوية (أفقي)</div><div class="desc">مناسب للجوال والشاشات الصغيرة</div></div>
+              <button id="layout-top-btn" class="setting-toggle ${layout === 'top' ? 'on' : ''}"></button>
+            </div>
+            <div class="setting-row">
+              <div><div class="label">القائمة الجانبية (عمودي)</div><div class="desc">مناسب للحاسوب والشاشات الكبيرة</div></div>
+              <button id="layout-side-btn" class="setting-toggle ${layout === 'side' ? 'on' : ''}"></button>
+            </div>
+          </div>
+        </div>`;
+
+      $("#save-profile-btn").onclick = async () => {
+        const name = $("#set-name").value.trim();
+        if (!name) return showToast("أدخل الاسم", "error");
+        const btn = $("#save-profile-btn");
+        try {
+          setLoading(btn, true);
+          await updateProfile(currentUser, { displayName: name });
+          $("#user-name").textContent = name;
+          showToast("تم الحفظ", "success");
+          setLoading(btn, false);
+        } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+      };
+
+      const passBtn = $("#change-pass-btn");
+      if (passBtn) {
+        passBtn.onclick = async () => {
+          const oldPass = $("#set-old-pass").value;
+          const newPass = $("#set-new-pass").value;
+          if (!oldPass || !newPass) return showToast("أدخل كلمتي المرور", "error");
+          if (newPass.length < 6) return showToast("كلمة المرور 6 أحرف على الأقل", "error");
+          try {
+            setLoading(passBtn, true);
+            const cred = EmailAuthProvider.credential(currentUser.email, oldPass);
+            await reauthenticateWithCredential(currentUser, cred);
+            await updatePassword(currentUser, newPass);
+            showToast("تم تغيير كلمة المرور", "success");
+            $("#set-old-pass").value = ""; $("#set-new-pass").value = "";
+            setLoading(passBtn, false);
+          } catch (e) {
+            let msg = e.message;
+            if (e.code === "auth/wrong-password") msg = "كلمة المرور الحالية غير صحيحة";
+            showToast("فشل: " + msg, "error");
+            setLoading(passBtn, false);
+          }
+        };
+      }
+
+      $("#toggle-dark").onclick = () => {
+        toggleTheme();
+        const nowDark = document.documentElement.getAttribute("data-theme") === "dark";
+        $("#toggle-dark").classList.toggle("on", nowDark);
+      };
+
+      $("#layout-top-btn").onclick = () => {
+        applyLayout("top");
+        $("#layout-top-btn").classList.add("on");
+        $("#layout-side-btn").classList.remove("on");
+      };
+      $("#layout-side-btn").onclick = () => {
+        applyLayout("side");
+        $("#layout-side-btn").classList.add("on");
+        $("#layout-top-btn").classList.remove("on");
+      };
+    }
+
+    // ============================================
+    // PWA Install
+    // ============================================
+    let deferredPrompt = null;
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      $("#install-banner").classList.remove("hidden");
+    });
+    $("#install-accept").onclick = async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") showToast("تم التثبيت!", "success");
+      deferredPrompt = null;
+      $("#install-banner").classList.add("hidden");
+    };
+    $("#install-dismiss").onclick = () => $("#install-banner").classList.add("hidden");
+
+    // Register Service Worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js").catch(() => {});
+    }
+  </script>
+</body>
+</html>

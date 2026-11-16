@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إنشاء حساب — إدارة المستودعات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f4f6f9; --card: #fff; --primary: #2c5f8a; --primary-dark: #1e4468;
+      --accent: #c9a227; --text: #1e293b; --muted: #64748b; --border: #e2e8f0;
+      --success: #16a34a; --danger: #dc2626; --warning: #ea580c;
+      --shadow: 0 4px 16px rgba(0,0,0,.06); --radius: 16px;
+    }
+    body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; display: flex; }
+
+    /* ============ Split Screen ============ */
+    .signup-container { display: flex; min-height: 100vh; width: 100%; }
+    .brand-panel {
+      flex: 1; background: linear-gradient(135deg, #2c5f8a, #1e4468);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px; color: #fff; position: relative; overflow: hidden;
+    }
+    .brand-panel::before {
+      content: ''; position: absolute; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(201,162,39,.2), transparent 70%);
+      top: -100px; right: -100px; border-radius: 50%;
+    }
+    .brand-panel::after {
+      content: ''; position: absolute; width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(201,162,39,.15), transparent 70%);
+      bottom: -80px; left: -80px; border-radius: 50%;
+    }
+    .logo-svg { width: 140px; height: 140px; margin-bottom: 24px; position: relative; z-index: 1; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .brand-panel h1 { font-size: 32px; margin-bottom: 12px; position: relative; z-index: 1; }
+    .brand-panel p { font-size: 16px; opacity: .9; text-align: center; max-width: 360px; position: relative; z-index: 1; line-height: 1.7; }
+
+    .form-panel {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 40px 20px; background: var(--card);
+    }
+    .form-card { width: 100%; max-width: 400px; }
+    .form-card h2 { color: var(--primary); font-size: 26px; margin-bottom: 8px; }
+    .form-card .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; }
+    .form-group label .req { color: var(--danger); }
+    .form-control {
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-family: inherit; font-size: 14px; background: #fafbfd;
+      transition: .2s;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(44,95,138,.1); }
+    .form-control.error { border-color: var(--danger); }
+
+    .password-strength { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .password-strength-bar { height: 100%; width: 0; transition: all .3s; border-radius: 2px; }
+    .strength-text { font-size: 12px; margin-top: 4px; color: var(--muted); }
+
+    .error-msg { color: var(--danger); font-size: 13px; margin-top: 6px; display: none; }
+    .error-msg.show { display: block; }
+
+    .btn-primary {
+      width: 100%; padding: 13px; background: var(--primary); color: #fff;
+      border: none; border-radius: 10px; font-family: inherit; font-size: 15px;
+      font-weight: 600; cursor: pointer; transition: .2s; margin-top: 8px;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-left: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .login-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--muted); }
+    .login-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .login-link a:hover { text-decoration: underline; }
+
+    .back-home { position: absolute; top: 20px; left: 20px; color: #fff; text-decoration: none; font-size: 14px; opacity: .8; z-index: 2; }
+    .back-home:hover { opacity: 1; }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; opacity: 0; transition: .3s; z-index: 1000; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .signup-container { flex-direction: column; }
+      .brand-panel { padding: 32px 20px; min-height: 220px; }
+      .logo-svg { width: 80px; height: 80px; margin-bottom: 12px; }
+      .brand-panel h1 { font-size: 22px; }
+      .brand-panel p { font-size: 13px; }
+      .form-panel { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="signup-container">
+    <!-- Brand Panel -->
+    <div class="brand-panel">
+      <a href="index.html" class="back-home">← العودة للرئيسية</a>
+
+      <!-- Logo SVG -->
+      <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#c9a227"/>
+            <stop offset="100%" stop-color="#8b6914"/>
+          </linearGradient>
+          <linearGradient id="topGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#e8c547"/>
+            <stop offset="100%" stop-color="#c9a227"/>
+          </linearGradient>
+        </defs>
+        <!-- Box body -->
+        <path d="M20 35 L50 20 L80 35 L80 75 L50 90 L20 75 Z" fill="url(#boxGrad)" opacity="0.95"/>
+        <!-- Box top -->
+        <path d="M20 35 L50 20 L80 35 L50 50 Z" fill="url(#topGrad)"/>
+        <!-- Center line -->
+        <path d="M50 50 L50 90" stroke="#8b6914" stroke-width="1.5" opacity="0.5"/>
+        <!-- Rotation arrows -->
+        <path d="M65 30 Q75 30 75 40" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <polygon points="75,40 72,35 78,35" fill="#fff"/>
+        <path d="M35 70 Q25 70 25 60" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <polygon points="25,60 28,65 22,65" fill="#fff"/>
+      </svg>
+
+      <h1>إدارة المستودعات</h1>
+      <p>نظام متكامل لإدارة مخزونك ومستودعاتك بكل سهولة واحترافية</p>
+    </div>
+
+    <!-- Form Panel -->
+    <div class="form-panel">
+      <div class="form-card">
+        <h2>إنشاء حساب جديد</h2>
+        <p class="subtitle">ابدأ بإدارة مستودعاتك في دقيقة واحدة</p>
+
+        <div class="form-group">
+          <label for="name">الاسم الكامل <span class="req">*</span></label>
+          <input type="text" id="name" class="form-control" placeholder="مثال: أحمد محمد" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">البريد الإلكتروني <span class="req">*</span></label>
+          <input type="email" id="email" class="form-control" placeholder="example@mail.com" />
+          <div id="email-error" class="error-msg">صيغة البريد غير صحيحة</div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">كلمة المرور <span class="req">*</span></label>
+          <input type="password" id="password" class="form-control" placeholder="6 أحرف على الأقل" />
+          <div class="password-strength"><div id="strength-bar" class="password-strength-bar"></div></div>
+          <div id="strength-text" class="strength-text">أدخل كلمة مرور</div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm">تأكيد كلمة المرور <span class="req">*</span></label>
+          <input type="password" id="confirm" class="form-control" placeholder="أعد كتابة كلمة المرور" />
+          <div id="confirm-error" class="error-msg">كلمتا المرور غير متطابقتين</div>
+        </div>
+
+        <button id="signup-btn" class="btn-primary">إنشاء الحساب</button>
+
+        <div class="login-link">
+          لديك حساب بالفعل؟ <a href="index.html">تسجيل الدخول</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    const firebaseConfig = {
+      apiKey: "AIzaSyC2h5xglOIfzWStVSEAxaJ4iA4Nlb_mmZE",
+      authDomain: "storehouse-e8a29.firebaseapp.com",
+      projectId: "storehouse-e8a29",
+      storageBucket: "storehouse-e8a29.firebasestorage.app",
+      messagingSenderId: "129183410595",
+      appId: "1:129183410595:web:52552e61c1c4aad9c5d216",
+      measurementId: "G-EKWSP2HJGJ"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const $ = (s) => document.querySelector(s);
+    function showToast(msg, type = "") {
+      const t = $("#toast");
+      t.textContent = msg;
+      t.className = "toast show " + type;
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.className = "toast"; }, 3000);
+    }
+    function setLoading(btn, loading) {
+      if (loading) {
+        btn.disabled = true;
+        btn.dataset.original = btn.innerHTML;
+        btn.innerHTML = `<span class="spinner"></span> جارٍ الإنشاء...`;
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.original || btn.innerHTML;
+      }
+    }
+
+    // Password strength
+    $("#password").addEventListener("input", (e) => {
+      const pwd = e.target.value;
+      const bar = $("#strength-bar");
+      const text = $("#strength-text");
+      let score = 0;
+      if (pwd.length >= 6) score++;
+      if (pwd.length >= 10) score++;
+      if (/[A-Z]/.test(pwd)) score++;
+      if (/[0-9]/.test(pwd)) score++;
+      if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+      const levels = [
+        { width: "0%", color: "#e2e8f0", label: "أدخل كلمة مرور" },
+        { width: "25%", color: "#dc2626", label: "ضعيفة جداً" },
+        { width: "50%", color: "#ea580c", label: "ضعيفة" },
+        { width: "75%", color: "#eab308", label: "متوسطة" },
+        { width: "100%", color: "#16a34a", label: "قوية" }
+      ];
+      const lvl = levels[Math.min(score, 4)];
+      bar.style.width = lvl.width;
+      bar.style.background = lvl.color;
+      text.textContent = lvl.label;
+      text.style.color = lvl.color;
+    });
+
+    // Email validation
+    $("#email").addEventListener("input", (e) => {
+      const email = e.target.value;
+      const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      $("#email-error").classList.toggle("show", email && !valid);
+      e.target.classList.toggle("error", email && !valid);
+    });
+
+    // Confirm password
+    $("#confirm").addEventListener("input", (e) => {
+      const match = e.target.value === $("#password").value;
+      $("#confirm-error").classList.toggle("show", e.target.value && !match);
+      e.target.classList.toggle("error", e.target.value && !match);
+    });
+
+    // Submit
+    $("#signup-btn").addEventListener("click", async () => {
+      const name = $("#name").value.trim();
+      const email = $("#email").value.trim();
+      const password = $("#password").value;
+      const confirm = $("#confirm").value;
+
+      if (!name) return showToast("أدخل اسمك الكامل", "error");
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast("البريد الإلكتروني غير صحيح", "error");
+      if (password.length < 6) return showToast("كلمة المرور 6 أحرف على الأقل", "error");
+      if (password !== confirm) return showToast("كلمتا المرور غير متطابقتين", "error");
+
+      const btn = $("#signup-btn");
+      try {
+        setLoading(btn, true);
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(cred.user, { displayName: name });
+        await sendEmailVerification(cred.user).catch(() => {});
+        showToast("تم إنشاء الحساب بنجاح! جارٍ التحويل...", "success");
+        setTimeout(() => window.location.href = "index.html", 1500);
+      } catch (e) {
+        let msg = e.message;
+        if (e.code === 'auth/email-already-in-use') msg = "هذا البريد مستخدم بالفعل";
+        else if (e.code === 'auth/weak-password') msg = "كلمة المرور ضعيفة";
+        else if (e.code === 'auth/invalid-email') msg = "صيغة البريد غير صحيحة";
+        showToast("فشل: " + msg, "error");
+        setLoading(btn, false);
+      }
+    });
+  </script>
+</body>
+</html>
