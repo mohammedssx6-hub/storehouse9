@@ -94,9 +94,10 @@
     .app.layout-top { flex-direction: column; }
     .app.layout-side { flex-direction: row; }
 
+    /* تعديل الشريط العلوي ليكون أوسع وأنظف */
     .sidebar {
       background: var(--sidebar-bg); border-bottom: 1px solid var(--border);
-      padding: 10px 16px; display: flex; flex-direction: row; align-items: center; gap: 12px;
+      padding: 8px 12px; display: flex; flex-direction: row; align-items: center; gap: 10px;
       position: sticky; top: 0; z-index: 900; flex-wrap: wrap;
       transition: background .3s;
     }
@@ -107,8 +108,12 @@
       padding: 20px; gap: 20px; flex-shrink: 0;
     }
 
-    .brand { display: flex; align-items: center; gap: 8px; }
-    .brand-name { font-size: 15px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+    /* تصغير الشعار وحذف الكلمة في الجوال */
+    .brand { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .brand .logo-svg { width: 28px; height: 28px; } /* أصغر */
+    .brand-name { display: none; } /* مخفية في الشريط العلوي */
+    .layout-side .brand .logo-svg { width: 40px; height: 40px; }
+    .layout-side .brand-name { display: block; font-size: 15px; font-weight: 700; color: var(--primary); white-space: nowrap; }
 
     .nav { display: flex; flex-direction: row; gap: 6px; flex: 1; overflow-x: auto; scrollbar-width: none; }
     .nav::-webkit-scrollbar { display: none; }
@@ -121,9 +126,9 @@
     .nav-link:hover { background: var(--input-bg); }
     .nav-link.active { background: var(--primary); color: #fff; }
 
-    .user-box { display: flex; align-items: center; gap: 8px; }
-    .layout-top .user-box { margin-right: auto; }
-    .layout-side .user-box { padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
+    /* حذف صندوق المستخدم من الشريط العلوي (يظهر فقط في الوضع الجانبي) */
+    .user-box { display: none; }
+    .layout-side .user-box { display: flex; align-items: center; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
     .user-box img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--input-bg); }
     .user-name { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 90px; }
     .btn-link { background: none; border: none; color: var(--danger); cursor: pointer; font-family: inherit; font-size: 12px; padding: 0; }
@@ -344,11 +349,6 @@
       font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
       z-index: 10; backdrop-filter: blur(4px);
     }
-    .camera-manual-btn {
-      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: var(--primary); color: #fff; border: none; padding: 10px 20px;
-      border-radius: 20px; font-family: inherit; font-size: 14px; cursor: pointer; z-index: 10;
-    }
 
     /* ============ Settings ============ */
     .settings-group { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -367,6 +367,28 @@
       border-radius: 50%; background: #fff; transition: .2s;
     }
     .setting-toggle.on::after { right: 22px; }
+
+    /* ============ Tour Guide ============ */
+    .tour-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 4000;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      animation: fadeIn .3s ease;
+    }
+    .tour-card {
+      background: var(--card); border-radius: 20px; padding: 30px; max-width: 420px; width: 100%;
+      text-align: center; animation: popIn .3s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .tour-card .icon { font-size: 64px; margin-bottom: 16px; }
+    .tour-card h3 { color: var(--primary); font-size: 20px; margin-bottom: 12px; }
+    .tour-card p { color: var(--text); font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
+    .tour-card .tour-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
+    .tour-card .tour-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: .3s; }
+    .tour-card .tour-dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+    .tour-card .tour-btns { display: flex; gap: 8px; }
+    .tour-card .tour-btns button { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; }
+    .tour-card .tour-next { background: var(--primary); color: #fff; }
+    .tour-card .tour-skip { background: var(--input-bg); color: var(--muted); }
 
     /* ============ Responsive ============ */
     @media (max-width: 900px) {
@@ -514,6 +536,9 @@
     </div>
     <div class="camera-hint">ضع الباركود داخل الإطار</div>
   </div>
+
+  <!-- Tour Guide Overlay -->
+  <div id="tour-overlay" class="tour-overlay hidden"></div>
 
   <!-- Install Banner -->
   <div id="install-banner" class="install-banner hidden">
@@ -815,6 +840,49 @@
     }
 
     // ============================================
+    // Tour Guide (Onboarding)
+    // ============================================
+    const tourSteps = [
+      { icon: "👋", title: "أهلاً بك!", text: "مرحباً بك في نظام إدارة المستودعات. سنأخذك في جولة سريعة لتتعرف على أهم الميزات." },
+      { icon: "🏬", title: "أضف مستودعك الأول", text: "من صفحة 'المستودعات'، اضغط على زر '+ مستودع جديد' لإنشاء مستودعك الأول. يمكنك إضافة عدة مستودعات." },
+      { icon: "📦", title: "أضف الأصناف", text: "افتح المستودع واضغط '+ إضافة صنف'. يمكنك مسح الباركود بالكاميرا مباشرة، أو كتابته يدوياً. حدد الكمية والسعر والحد الأدنى للتنبيه." },
+      { icon: "🔄", title: "انقل البضاعة", text: "من صفحة 'نقل البضاعة'، اختر المستودع المصدر، ثم الصنف (سيظهر لك الرصيد المتاح)، ثم الكمية، والمستودع المستلم." },
+      { icon: "🔍", title: "ابحث بسهولة", text: "من صفحة 'البحث'، اكتب اسم الصنف أو امسح الباركود بالكاميرا لمعرفة كمياته في جميع المستودعات دفعة واحدة." },
+      { icon: "⚙️", title: "خصص حسابك", text: "من صفحة 'الإعدادات'، يمكنك تغيير اسمك، كلمة المرور، الوضع الليلي، وشكل القائمة (أفقي أو جانبي)." }
+    ];
+
+    let tourIndex = 0;
+    function startTour() {
+      tourIndex = 0;
+      renderTourStep();
+      $("#tour-overlay").classList.remove("hidden");
+    }
+    function renderTourStep() {
+      const step = tourSteps[tourIndex];
+      const dots = tourSteps.map((_, i) => `<div class="tour-dot ${i === tourIndex ? 'active' : ''}"></div>`).join("");
+      $("#tour-overlay").innerHTML = `
+        <div class="tour-card">
+          <div class="icon">${step.icon}</div>
+          <h3>${step.title}</h3>
+          <p>${step.text}</p>
+          <div class="tour-dots">${dots}</div>
+          <div class="tour-btns">
+            <button class="tour-skip" onclick="localStorage.setItem('tourDone','1'); document.getElementById('tour-overlay').classList.add('hidden')">تخطي</button>
+            <button class="tour-next" onclick="window._tourNext()">${tourIndex === tourSteps.length - 1 ? 'تم' : 'التالي ←'}</button>
+          </div>
+        </div>`;
+    }
+    window._tourNext = () => {
+      tourIndex++;
+      if (tourIndex >= tourSteps.length) {
+        localStorage.setItem("tourDone", "1");
+        $("#tour-overlay").classList.add("hidden");
+      } else {
+        renderTourStep();
+      }
+    };
+
+    // ============================================
     // Auth
     // ============================================
     $("#google-login-btn").addEventListener("click", async () => {
@@ -864,6 +932,11 @@
         $("#user-avatar").src = user.photoURL || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%232c5f8a' width='40' height='40'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.35em' fill='white' font-size='18'%3E👤%3C/text%3E%3C/svg%3E";
         applyLayout(localStorage.getItem("layout") || "top");
         navigate("dashboard");
+
+        // إظهار الجولة للمستخدم الجديد
+        if (!localStorage.getItem("tourDone")) {
+          setTimeout(startTour, 800);
+        }
       } else {
         currentUser = null;
         $("#login-screen").classList.remove("hidden");
@@ -903,7 +976,6 @@
       }
     }
     document.querySelectorAll(".nav-link").forEach(a => a.addEventListener("click", () => navigate(a.dataset.page)));
-    $("#menu-toggle")?.addEventListener("click", () => $(".sidebar").classList.toggle("open"));
 
     // ============================================
     // Dashboard (Fixed Unique Count)
@@ -925,6 +997,22 @@
         }
         const logs = await getRecentLogs(5);
         const lowStock = await getLowStockItems();
+
+        // إذا لم يكن هناك مستودعات، أظهر بطاقة ترحيبية
+        if (whs.length === 0) {
+          page.innerHTML = `
+            <div class="section-card" style="text-align:center;padding:40px 20px">
+              <div style="font-size:64px;margin-bottom:16px">🏬</div>
+              <h3 style="justify-content:center;font-size:22px;margin-bottom:12px">مرحباً بك في نظام إدارة المستودعات</h3>
+              <p style="color:var(--muted);margin-bottom:24px;line-height:1.8">لنبدأ معاً، أضف مستودعك الأول لتتمكن من إضافة الأصناف وإدارتها.</p>
+              <button class="btn btn-primary" onclick="document.querySelector('.nav-link[data-page=\\'warehouses\\']').click()" style="padding:14px 32px;font-size:16px">+ إضافة مستودعك الأول</button>
+              <div style="margin-top:20px">
+                <button class="btn btn-outline" onclick="startTour()">🎓 إعادة الجولة التعريفية</button>
+              </div>
+            </div>`;
+          page.dataset.loaded = "1";
+          return;
+        }
 
         page.innerHTML = `
           <div class="stats-grid">
@@ -1498,10 +1586,15 @@
 
           <div class="settings-group">
             <h4>👤 تفاصيل الحساب</h4>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--input-bg);border-radius:10px">
+              <img src="${user.photoURL || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%232c5f8a' width='40' height='40'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.35em' fill='white' font-size='18'%3E👤%3C/text%3E%3C/svg%3E"}" style="width:48px;height:48px;border-radius:50%" />
+              <div style="flex:1">
+                <div style="font-weight:600">${user.displayName || "مستخدم"}</div>
+                <div style="font-size:12px;color:var(--muted)">${user.email || ""}</div>
+              </div>
+            </div>
             <div class="form-group"><label>الاسم</label>
               <input id="set-name" class="form-control" value="${user.displayName || ""}" /></div>
-            <div class="form-group"><label>البريد الإلكتروني</label>
-              <input class="form-control" value="${user.email || ""}" disabled style="opacity:.7" /></div>
             <button id="save-profile-btn" class="btn btn-primary">حفظ الاسم</button>
           </div>
 
@@ -1535,6 +1628,19 @@
               <button id="layout-side-btn" class="setting-toggle ${layout === 'side' ? 'on' : ''}"></button>
             </div>
           </div>
+
+          <div class="settings-group">
+            <h4>📖 المساعدة</h4>
+            <div class="setting-row">
+              <div><div class="label">إعادة الجولة التعريفية</div><div class="desc">عرض شرح الميزات مرة أخرى</div></div>
+              <button id="restart-tour-btn" class="btn btn-outline btn-sm">▶️ بدء</button>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h4>🚪 الحساب</h4>
+            <button id="logout-btn-settings" class="btn btn-danger" style="width:100%">تسجيل الخروج</button>
+          </div>
         </div>`;
 
       $("#save-profile-btn").onclick = async () => {
@@ -1547,6 +1653,7 @@
           $("#user-name").textContent = name;
           showToast("تم الحفظ", "success");
           setLoading(btn, false);
+          renderSettings(page);
         } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
       };
 
@@ -1590,6 +1697,13 @@
         $("#layout-side-btn").classList.add("on");
         $("#layout-top-btn").classList.remove("on");
       };
+
+      $("#restart-tour-btn").onclick = () => {
+        localStorage.removeItem("tourDone");
+        startTour();
+      };
+
+      $("#logout-btn-settings").onclick = () => signOut(auth);
     }
 
     // ============================================
