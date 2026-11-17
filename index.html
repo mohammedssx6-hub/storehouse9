@@ -20,6 +20,7 @@
       --success: #16a34a; --danger: #dc2626; --warning: #ea580c;
       --shadow: 0 4px 16px rgba(0,0,0,.06); --radius: 14px;
       --sidebar-bg: #fff; --input-bg: #fafbfd;
+      --sidebar-width: 260px;
     }
     [data-theme="dark"] {
       --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --primary-dark: #2563eb;
@@ -75,6 +76,7 @@
     }
     .form-control:focus { outline: none; border-color: var(--primary); background: var(--card); box-shadow: 0 0 0 3px rgba(44,95,138,.1); }
     textarea.form-control { min-height: 70px; resize: vertical; }
+    select.form-control { cursor: pointer; }
 
     .btn-email {
       width: 100%; padding: 13px; background: var(--primary); color: #fff;
@@ -97,15 +99,26 @@
       background: var(--sidebar-bg); border-bottom: 1px solid var(--border);
       padding: 8px 12px; display: flex; flex-direction: row; align-items: center; gap: 10px;
       position: sticky; top: 0; z-index: 900; flex-wrap: wrap;
-      transition: background .3s;
+      transition: all .3s;
     }
     .layout-top .sidebar { width: 100%; border-left: none; }
     
     .layout-side .sidebar {
-      width: 260px; height: 100vh; flex-direction: column; align-items: stretch;
+      width: var(--sidebar-width); height: 100vh; flex-direction: column; align-items: stretch;
       border-left: 1px solid var(--border); border-bottom: none; position: sticky; top: 0;
       padding: 20px 16px; gap: 20px; flex-shrink: 0; overflow-y: auto;
+      transition: width .3s, padding .3s;
     }
+    .layout-side.sidebar-closed .sidebar {
+      width: 70px; padding: 20px 8px; overflow: hidden;
+    }
+    .layout-side.sidebar-closed .brand-name,
+    .layout-side.sidebar-closed .user-info div,
+    .layout-side.sidebar-closed .user-actions,
+    .layout-side.sidebar-closed .nav-link .nav-text { display: none; }
+    .layout-side.sidebar-closed .nav-link { justify-content: center; padding: 12px 0; }
+    .layout-side.sidebar-closed .brand { justify-content: center; }
+    .layout-side.sidebar-closed .brand .logo-svg { width: 32px; height: 32px; }
 
     .brand { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .brand .logo-svg { width: 28px; height: 28px; }
@@ -142,11 +155,28 @@
       transition: .2s; flex-shrink: 0;
     }
     .theme-toggle:hover { transform: rotate(20deg); }
+    .sidebar-toggle {
+      background: var(--input-bg); border: 1px solid var(--border);
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      font-size: 16px; display: none; align-items: center; justify-content: center;
+      position: absolute; top: 10px; left: -16px; z-index: 10;
+      box-shadow: 0 2px 5px rgba(0,0,0,.1);
+    }
+    .layout-side .sidebar-toggle { display: flex; }
 
-    .main { flex: 1; padding: 20px; min-width: 0; overflow-x: hidden; width: 100%; }
+    .main { flex: 1; padding: 20px; min-width: 0; overflow-x: hidden; width: 100%; transition: margin .3s; }
     .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; justify-content: space-between; }
     .topbar-left { display: flex; align-items: center; gap: 12px; }
     .topbar h2 { font-size: 20px; color: var(--primary); }
+
+    /* ============ Tabs ============ */
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+    .tab {
+      padding: 8px 16px; border-radius: 20px; background: var(--input-bg);
+      border: 1.5px solid var(--border); cursor: pointer; font-size: 14px;
+      font-family: inherit; color: var(--text); transition: .2s; white-space: nowrap;
+    }
+    .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     /* ============ Pages ============ */
     .page { display: none; }
@@ -157,7 +187,7 @@
     }
 
     /* ============ Cards ============ */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .stat-card {
       background: var(--card); padding: 20px; border-radius: var(--radius);
       box-shadow: var(--shadow); border-right: 4px solid var(--primary);
@@ -165,13 +195,21 @@
     }
     .stat-card:hover { transform: translateY(-3px); }
     .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
-    .stat-card .value { font-size: 28px; font-weight: 700; color: var(--primary); }
+    .stat-card .value { font-size: 24px; font-weight: 700; color: var(--primary); }
     .stat-card.warning { border-right-color: var(--warning); }
     .stat-card.warning .value { color: var(--warning); }
+    .stat-card.success { border-right-color: var(--success); }
+    .stat-card.success .value { color: var(--success); }
 
     .section-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px; animation: cardIn .3s ease; }
     @keyframes cardIn { from { opacity: 0; } to { opacity: 1; } }
     .section-card h3 { margin-bottom: 16px; color: var(--primary); font-size: 17px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+    /* ============ Compact Form ============ */
+    .compact-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+    .compact-form .form-group { flex: 1; min-width: 120px; margin-bottom: 0; }
+    .compact-form .form-control { padding: 8px 10px; font-size: 13px; }
+    .compact-form .btn { padding: 8px 12px; font-size: 13px; }
 
     /* ============ Buttons ============ */
     .btn {
@@ -189,11 +227,12 @@
     .btn-outline:hover { background: var(--input-bg); }
     .btn-success { background: var(--success); color: #fff; }
     .btn-sm { padding: 7px 13px; font-size: 13px; }
+    .btn-icon { padding: 8px; border-radius: 8px; }
 
     /* ============ Table ============ */
     .table { width: 100%; border-collapse: collapse; }
     .table th, .table td { padding: 12px; text-align: right; border-bottom: 1px solid var(--border); font-size: 13px; }
-    .table th { background: var(--input-bg); color: var(--muted); font-weight: 600; font-size: 12px; }
+    .table th { background: var(--input-bg); color: var(--muted); font-weight: 600; font-size: 12px; white-space: nowrap; }
     .table tr:hover td { background: var(--input-bg); }
 
     .low-stock { background: rgba(234,88,12,.08); }
@@ -245,7 +284,7 @@
     .result-card .name { font-weight: 700; color: var(--primary); font-size: 16px; }
     .result-card .price { color: var(--success); font-weight: 600; }
     .result-card .wh-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .wh-badge { background: var(--input-bg); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border); }
+    .wh-badge { background: var(--input-bg); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border); display: inline-block; margin: 2px; }
     .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
     .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
 
@@ -260,7 +299,7 @@
 
     /* ============ Searchable dropdown ============ */
     .searchable { position: relative; }
-    .searchable-list { max-height: 200px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 10px; background: var(--card); display: none; margin-top: 4px; }
+    .searchable-list { max-height: 200px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 10px; background: var(--card); display: none; margin-top: 4px; position: absolute; width: 100%; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
     .searchable-list.open { display: block; animation: popIn .2s ease; }
     .searchable-item { padding: 11px 14px; cursor: pointer; font-size: 14px; border-bottom: 1px solid var(--border); }
     .searchable-item:last-child { border-bottom: none; }
@@ -406,9 +445,31 @@
     </div>
   </div>
 
+  <!-- ============ Company Setup Screen ============ -->
+  <div id="company-screen" class="login-screen hidden">
+    <div class="login-card">
+      <h1>إعداد بيانات الشركة</h1>
+      <p>هذه البيانات ستظهر في الفواتير والسندات</p>
+      <div class="form-group">
+        <label>اسم الشركة <span class="req">*</span></label>
+        <input id="company-name" class="form-control" placeholder="مثال: شركة النور للتجارة" />
+      </div>
+      <div class="form-group">
+        <label>رقم الهاتف <span class="req">*</span></label>
+        <input id="company-phone" class="form-control" placeholder="مثال: 0500000000" />
+      </div>
+      <div class="form-group">
+        <label>الشعار (اختياري - رفع ملف)</label>
+        <input type="file" id="company-logo" class="form-control" accept="image/*" />
+      </div>
+      <button id="save-company-btn" class="btn-email">حفظ ومتابعة</button>
+    </div>
+  </div>
+
   <!-- ============ Main App ============ -->
   <div id="app" class="app layout-top hidden">
     <aside class="sidebar">
+      <button class="sidebar-toggle" id="sidebar-toggle">◀</button>
       <div class="brand">
         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <path d="M20 35 L50 20 L80 35 L80 75 L50 90 L20 75 Z" fill="#2c5f8a"/>
@@ -422,18 +483,19 @@
         <span class="brand-name">المستودعات</span>
       </div>
       <nav class="nav">
-        <a class="nav-link active" data-page="dashboard">🏠 الرئيسية</a>
-        <a class="nav-link" data-page="warehouses">🏬 المستودعات</a>
-        <a class="nav-link" data-page="inventory">📦 المخزون</a>
-        <a class="nav-link" data-page="purchases">🛒 فواتير المشتريات</a>
-        <a class="nav-link" data-page="sales">💰 فواتير المبيعات</a>
-        <a class="nav-link" data-page="vouchers">🧾 السندات</a>
-        <a class="nav-link" data-page="partners">🤝 الشركاء</a>
-        <a class="nav-link" data-page="transfer">🔄 نقل البضاعة</a>
-        <a class="nav-link" data-page="search">🔍 البحث</a>
-        <a class="nav-link" data-page="logs">📋 سجل العمليات</a>
-        <a class="nav-link" data-page="alerts">🔔 التنبيهات</a>
-        <a class="nav-link" data-page="settings">⚙️ الإعدادات</a>
+        <a class="nav-link active" data-page="dashboard"><span class="nav-icon">🏠</span><span class="nav-text">الرئيسية</span></a>
+        <a class="nav-link" data-page="warehouses"><span class="nav-icon">🏬</span><span class="nav-text">المستودعات</span></a>
+        <a class="nav-link" data-page="inventory"><span class="nav-icon">📦</span><span class="nav-text">المخزون</span></a>
+        <a class="nav-link" data-page="purchases"><span class="nav-icon">🛒</span><span class="nav-text">المشتريات</span></a>
+        <a class="nav-link" data-page="sales"><span class="nav-icon">💰</span><span class="nav-text">المبيعات</span></a>
+        <a class="nav-link" data-page="vouchers"><span class="nav-icon">🧾</span><span class="nav-text">السندات</span></a>
+        <a class="nav-link" data-page="partners"><span class="nav-icon">🤝</span><span class="nav-text">الشركاء</span></a>
+        <a class="nav-link" data-page="reports"><span class="nav-icon">📊</span><span class="nav-text">التقارير</span></a>
+        <a class="nav-link" data-page="transfer"><span class="nav-icon">🔄</span><span class="nav-text">نقل البضاعة</span></a>
+        <a class="nav-link" data-page="search"><span class="nav-icon">🔍</span><span class="nav-text">البحث</span></a>
+        <a class="nav-link" data-page="logs"><span class="nav-icon">📋</span><span class="nav-text">السجل</span></a>
+        <a class="nav-link" data-page="alerts"><span class="nav-icon">🔔</span><span class="nav-text">التنبيهات</span></a>
+        <a class="nav-link" data-page="settings"><span class="nav-icon">⚙️</span><span class="nav-text">الإعدادات</span></a>
       </nav>
       <div class="user-box">
         <div class="user-info">
@@ -465,6 +527,7 @@
       <section id="page-sales" class="page"></section>
       <section id="page-vouchers" class="page"></section>
       <section id="page-partners" class="page"></section>
+      <section id="page-reports" class="page"></section>
       <section id="page-transfer" class="page"></section>
       <section id="page-search" class="page"></section>
       <section id="page-logs" class="page"></section>
@@ -538,7 +601,7 @@
     import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, signInWithEmailAndPassword, updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile }
       from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
-      getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc,
+      getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc, setDoc,
       query, orderBy, serverTimestamp, runTransaction, limit, where
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -550,6 +613,8 @@
     let currentUser = null;
     let currentWarehouseId = null;
     let html5QrCode = null;
+    let companyData = null;
+    let currentCurrency = localStorage.getItem("currency") || "SAR";
 
     // ============================================
     // Helpers
@@ -559,7 +624,9 @@
     const fmtDate = (ts) => { if (!ts) return "-"; const d = ts.toDate ? ts.toDate() : new Date(ts); return d.toLocaleString("ar-EG", { dateStyle: "short", timeStyle: "short" }); };
     const fmtMoney = (n) => {
       if (n === null || n === undefined || n === "" || Number(n) === 0) return "—";
-      return Number(n).toLocaleString("ar-EG") + " ج.م";
+      const symbol = currentCurrency === "SAR" ? "ر.س" : currentCurrency === "EGP" ? "ج.م" : "$";
+      const num = Number(n).toLocaleString("ar-EG");
+      return `${num} ${symbol}`;
     };
     const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
@@ -653,6 +720,11 @@
     }
     document.addEventListener("click", (e) => {
       if (e.target.id === "theme-toggle" || e.target.id === "theme-toggle-login") toggleTheme();
+      if (e.target.id === "sidebar-toggle") {
+        $("#app").classList.toggle("sidebar-closed");
+        const btn = $("#sidebar-toggle");
+        btn.textContent = $("#app").classList.contains("sidebar-closed") ? "▶" : "◀";
+      }
     });
 
     // ============================================
@@ -660,9 +732,20 @@
     // ============================================
     const whCol = () => collection(db, "users", currentUser.uid, "warehouses");
     const logCol = () => collection(db, "users", currentUser.uid, "logs");
+    const invoicesCol = () => collection(db, "users", currentUser.uid, "invoices");
     const vouchersCol = () => collection(db, "users", currentUser.uid, "vouchers");
     const partnersCol = () => collection(db, "users", currentUser.uid, "partners");
     const itemsCol = (whId) => collection(db, "users", currentUser.uid, "warehouses", whId, "items");
+
+    async function getCompanyData() {
+      if (!currentUser) return null;
+      const s = await getDoc(doc(db, "users", currentUser.uid, "settings", "company"));
+      return s.exists() ? s.data() : null;
+    }
+    async function saveCompanyData(data) {
+      await setDoc(doc(db, "users", currentUser.uid, "settings", "company"), data);
+      companyData = data;
+    }
 
     async function addLog(action, details) {
       await addDoc(logCol(), { action, details, createdAt: serverTimestamp() });
@@ -715,7 +798,7 @@
     async function getRecentLogs(max = 5) { return getLogs(max, { limit: max }); }
 
     async function addPartner(name, type, phone, notes) {
-      await addDoc(partnersCol(), { name, type, phone: phone || "", notes: notes || "", createdAt: serverTimestamp() });
+      await addDoc(partnersCol(), { name, type, phone: phone || "", notes: notes || "", balance: 0, createdAt: serverTimestamp() });
       await addLog("إضافة شريك", `${type}: ${name}`);
     }
     async function getPartners(type = null) {
@@ -729,20 +812,37 @@
       await deleteDoc(doc(partnersCol(), id));
       await addLog("حذف شريك", name);
     }
+    async function updatePartnerBalance(partnerId, delta) {
+      if (!partnerId) return;
+      const ref = doc(partnersCol(), partnerId);
+      const s = await getDoc(ref);
+      if (s.exists()) {
+        const newBal = (Number(s.data().balance) || 0) + Number(delta);
+        await updateDoc(ref, { balance: newBal });
+      }
+    }
 
     // إضافة فاتورة (مشتريات أو مبيعات)
-    async function addInvoice(type, whId, whName, partnerId, partnerName, items, notes, total) {
+    async function addInvoice(type, partnerId, partnerName, items, paymentMethod, notes, total) {
+      const countSnap = await getDocs(invoicesCol());
+      const nextNum = countSnap.size + 1;
+      const invNumber = `${type === "purchase" ? "P" : "S"}-${String(nextNum).padStart(4, "0")}`;
+
+      // items now contains { name, quantity, price, warehouseId, warehouseName }
       const invoice = {
-        type, warehouseId: whId, warehouseName: whName,
+        invNumber, type,
         partnerId: partnerId || "", partnerName: partnerName || "",
-        items, notes: notes || "", total: total || 0, createdAt: serverTimestamp()
+        items, paymentMethod: paymentMethod || "cash",
+        notes: notes || "", total: total || 0, createdAt: serverTimestamp()
       };
-      const ref = await addDoc(vouchersCol(), invoice);
+      const ref = await addDoc(invoicesCol(), invoice);
       await addLog(type === "purchase" ? "فاتورة شراء" : "فاتورة بيع", 
-        `${items.length} صنف في ${whName}${total ? ` بقيمة ${total} ج.م` : ""}${partnerName ? ` - ${partnerName}` : ""}`);
+        `#${invNumber} - ${items.length} صنف بقيمة ${total} ${currentCurrency}${partnerName ? ` - ${partnerName}` : ""}`);
 
       // تحديث المخزون
       for (const item of items) {
+        const whId = item.warehouseId;
+        if (!whId) continue;
         const itemsSnap = await getDocs(itemsCol(whId));
         let existing = null;
         itemsSnap.forEach(d => {
@@ -765,30 +865,43 @@
           });
         }
       }
+
+      if (paymentMethod === "credit" && partnerId) {
+        const delta = type === "sale" ? -total : total;
+        await updatePartnerBalance(partnerId, delta);
+      }
       return ref.id;
     }
 
     async function getInvoices(max = 100, type = null) {
-      let q = query(vouchersCol(), orderBy("createdAt", "desc"), limit(max));
+      let q = query(invoicesCol(), orderBy("createdAt", "desc"), limit(max));
       const snap = await getDocs(q);
       let vouchers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (type) vouchers = vouchers.filter(v => v.type === type);
       return vouchers;
     }
     async function getInvoice(id) {
-      const s = await getDoc(doc(vouchersCol(), id));
+      const s = await getDoc(doc(invoicesCol(), id));
       return s.exists() ? { id: s.id, ...s.data() } : null;
     }
 
-    // إضافة سند (صرف/قبض/قيد)
-    async function addVoucher(type, amount, partnerName, notes) {
-      const v = { type, amount: Number(amount) || 0, partnerName: partnerName || "", notes: notes || "", createdAt: serverTimestamp() };
-      await addDoc(collection(db, "users", currentUser.uid, "vouchers_manual"), v);
+    // إضافة سند
+    async function addVoucher(type, amount, partnerId, partnerName, notes) {
+      const v = { type, amount: Number(amount) || 0, partnerId: partnerId || "", partnerName: partnerName || "", notes: notes || "", createdAt: serverTimestamp() };
+      const ref = await addDoc(vouchersCol(), v);
       await addLog(type === "receipt" ? "سند قبض" : type === "payment" ? "سند صرف" : "سند قيد",
-        `${amount} ج.م${partnerName ? ` - ${partnerName}` : ""}`);
+        `${amount} ${currentCurrency}${partnerName ? ` - ${partnerName}` : ""}`);
+      
+      if (partnerId) {
+        let delta = 0;
+        if (type === "receipt") delta = Number(amount);
+        else if (type === "payment") delta = -Number(amount);
+        await updatePartnerBalance(partnerId, delta);
+      }
+      return ref.id;
     }
     async function getManualVouchers(max = 100, type = null) {
-      let q = query(collection(db, "users", currentUser.uid, "vouchers_manual"), orderBy("createdAt", "desc"), limit(max));
+      let q = query(vouchersCol(), orderBy("createdAt", "desc"), limit(max));
       const snap = await getDocs(q);
       let vouchers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (type) vouchers = vouchers.filter(v => v.type === type);
@@ -833,26 +946,34 @@
       if (fromWhId === toWhId) throw new Error("لا يمكن النقل لنفس المستودع");
       qty = Number(qty);
       if (!qty || qty <= 0) throw new Error("الكمية يجب أن تكون أكبر من صفر");
+      
       const srcSnap = await getDocs(itemsCol(fromWhId));
       let srcDoc = null;
       const target = itemName.trim().toLowerCase();
       srcSnap.forEach(d => { if ((d.data().name || "").trim().toLowerCase() === target) srcDoc = { id: d.id, ...d.data() }; });
       if (!srcDoc) throw new Error("الصنف غير موجود في المصدر");
       if (Number(srcDoc.quantity) < qty) throw new Error(`الكمية غير كافية (متوفر: ${srcDoc.quantity})`);
+
       const dstSnap = await getDocs(itemsCol(toWhId));
       let dstDoc = null;
       dstSnap.forEach(d => { if ((d.data().name || "").trim().toLowerCase() === target) dstDoc = { id: d.id, ...d.data() }; });
+
       const srcRef = doc(db, "users", currentUser.uid, "warehouses", fromWhId, "items", srcDoc.id);
       const dstRef = dstDoc ? doc(db, "users", currentUser.uid, "warehouses", toWhId, "items", dstDoc.id) : null;
       const dstNewRef = !dstDoc ? doc(itemsCol(toWhId)) : null;
+
+      // تنفيذ المعاملة: جميع القراءات أولاً ثم الكتابات
       await runTransaction(db, async (tx) => {
-        const s = await tx.get(srcRef);
+        const s = await tx.get(srcRef); // قراءة 1
+        let dData = null;
+        if (dstRef) dData = await tx.get(dstRef); // قراءة 2 (إذا وجدت)
+        
+        // الآن الكتابات
         const cur = Number(s.data().quantity) || 0;
         if (cur < qty) throw new Error("الكمية تغيّرت، أعد المحاولة");
         tx.update(srcRef, { quantity: cur - qty, updatedAt: serverTimestamp() });
-        if (dstRef) {
-          const d = await tx.get(dstRef);
-          tx.update(dstRef, { quantity: (Number(d.data().quantity) || 0) + qty, updatedAt: serverTimestamp() });
+        if (dstRef && dData) {
+          tx.update(dstRef, { quantity: (Number(dData.data().quantity) || 0) + qty, updatedAt: serverTimestamp() });
         } else {
           tx.set(dstNewRef, {
             name: srcDoc.name, price: srcDoc.price, quantity: qty,
@@ -871,10 +992,10 @@
     const tourSteps = [
       { icon: "👋", title: "أهلاً بك!", text: "مرحباً بك في نظام إدارة المستودعات. سنأخذك في جولة سريعة لتتعرف على أهم الميزات." },
       { icon: "🏬", title: "أضف مستودعك الأول", text: "من صفحة 'المستودعات'، اضغط على زر '+ مستودع جديد' لإنشاء مستودعك الأول." },
-      { icon: "📦", title: "أضف الأصناف", text: "من صفحة 'المخزون'، يمكنك إضافة أصناف جديدة أو تعديل الموجود. يمكنك مسح الباركود بالكاميرا." },
+      { icon: "📦", title: "أضف الأصناف", text: "من صفحة 'المخزون'، يمكنك إضافة أصناف جديدة. يمكنك مسح الباركود بالكاميرا." },
       { icon: "🤝", title: "أضف شركاءك", text: "من صفحة 'الشركاء'، أضف العملاء والموردين والمندوبين لتتمكن من ربطهم بالفواتير." },
-      { icon: "🛒", title: "الفواتير", text: "من صفحة 'فواتير المشتريات' أو 'المبيعات'، سجل الفواتير واختر الشريك. يمكنك طباعتها أو حفظها PDF." },
-      { icon: "⚙️", title: "خصص حسابك", text: "من صفحة 'الإعدادات'، يمكنك تغيير اسمك، كلمة المرور، الوضع الليلي، وشكل القائمة." }
+      { icon: "🛒", title: "الفواتير", text: "من صفحة 'الفواتير'، سجل الفواتير (نقد/آجل/بنك) واختر الشريك. يمكنك طباعتها أو إرسالها واتساب." },
+      { icon: "📊", title: "التقارير", text: "من صفحة 'التقارير'، اعرض إجمالي المبيعات والمشتريات والفرق بينهما، وكشف حساب لكل شريك." }
     ];
 
     let tourIndex = 0;
@@ -950,19 +1071,56 @@
       if (user) {
         currentUser = user;
         $("#login-screen").classList.add("hidden");
-        $("#app").classList.remove("hidden");
-        $("#user-name").textContent = user.displayName || "مستخدم";
-        $("#user-email").textContent = user.email || "";
-        $("#user-avatar").src = user.photoURL || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%232c5f8a' width='40' height='40'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.35em' fill='white' font-size='18'%3E👤%3C/text%3E%3C/svg%3E";
-        applyLayout(localStorage.getItem("layout") || "top");
-        navigate("dashboard");
-        if (!localStorage.getItem("tourDone")) setTimeout(startTour, 800);
+        
+        // التحقق من وجود بيانات الشركة
+        companyData = await getCompanyData();
+        if (!companyData) {
+          $("#company-screen").classList.remove("hidden");
+          $("#app").classList.add("hidden");
+        } else {
+          $("#company-screen").classList.add("hidden");
+          $("#app").classList.remove("hidden");
+          $("#user-name").textContent = user.displayName || "مستخدم";
+          $("#user-email").textContent = user.email || "";
+          $("#user-avatar").src = user.photoURL || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%232c5f8a' width='40' height='40'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.35em' fill='white' font-size='18'%3E👤%3C/text%3E%3C/svg%3E";
+          applyLayout(localStorage.getItem("layout") || "top");
+          navigate("dashboard");
+          if (!localStorage.getItem("tourDone")) setTimeout(startTour, 800);
+        }
       } else {
         currentUser = null;
         $("#login-screen").classList.remove("hidden");
         $("#app").classList.add("hidden");
+        $("#company-screen").classList.add("hidden");
       }
     });
+
+    $("#save-company-btn").onclick = async () => {
+      const name = $("#company-name").value.trim();
+      const phone = $("#company-phone").value.trim();
+      const fileInput = $("#company-logo");
+      const file = fileInput.files[0];
+      
+      if (!name || !phone) return showToast("أدخل اسم الشركة ورقم الهاتف", "error");
+      const btn = $("#save-company-btn");
+      try {
+        setLoading(btn, true);
+        let logoBase64 = "";
+        if (file) {
+          logoBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        }
+        await saveCompanyData({ name, phone, logo: logoBase64 });
+        $("#company-screen").classList.add("hidden");
+        $("#app").classList.remove("hidden");
+        showToast("تم حفظ بيانات الشركة", "success");
+        navigate("dashboard");
+      } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+    };
 
     // ============================================
     // Router
@@ -970,7 +1128,7 @@
     const pageTitles = {
       dashboard: "الرئيسية", warehouses: "المستودعات", "warehouse-detail": "تفاصيل المستودع",
       inventory: "المخزون", purchases: "فواتير المشتريات", sales: "فواتير المبيعات",
-      vouchers: "السندات", partners: "الشركاء", transfer: "نقل البضاعة", search: "البحث",
+      vouchers: "السندات", partners: "الشركاء", reports: "التقارير", transfer: "نقل البضاعة", search: "البحث",
       logs: "سجل العمليات", alerts: "التنبيهات", settings: "الإعدادات"
     };
 
@@ -994,6 +1152,7 @@
         if (page === "sales") renderInvoices(pageEl, "sale");
         if (page === "vouchers") renderVouchers(pageEl);
         if (page === "partners") renderPartners(pageEl);
+        if (page === "reports") renderReports(pageEl);
         if (page === "transfer") renderTransfer(pageEl);
         if (page === "search") renderSearch(pageEl);
         if (page === "logs") renderLogs(pageEl);
@@ -1022,6 +1181,10 @@
         }
         const logs = await getRecentLogs(5);
         const lowStock = await getLowStockItems();
+        
+        const allInvoices = await getInvoices(1000);
+        const totalSales = allInvoices.filter(v => v.type === "sale").reduce((a, b) => a + (Number(b.total) || 0), 0);
+        const totalPurchases = allInvoices.filter(v => v.type === "purchase").reduce((a, b) => a + (Number(b.total) || 0), 0);
 
         if (whs.length === 0) {
           page.innerHTML = `
@@ -1041,9 +1204,11 @@
         page.innerHTML = `
           <div class="stats-grid">
             <div class="stat-card"><div class="label">المستودعات</div><div class="value">${whs.length}</div></div>
-            <div class="stat-card"><div class="label">إجمالي الأصناف الفريدة</div><div class="value">${uniqueItems.size}</div></div>
+            <div class="stat-card"><div class="label">الأصناف الفريدة</div><div class="value">${uniqueItems.size}</div></div>
             <div class="stat-card"><div class="label">إجمالي الكميات</div><div class="value">${totalQty}</div></div>
-            <div class="stat-card ${lowStock.length ? 'warning' : ''}"><div class="label">أصناف تحتاج تنبيه</div><div class="value">${lowStock.length}</div></div>
+            <div class="stat-card success"><div class="label">إجمالي المبيعات</div><div class="value" style="font-size:18px">${fmtMoney(totalSales)}</div></div>
+            <div class="stat-card warning"><div class="label">إجمالي المشتريات</div><div class="value" style="font-size:18px">${fmtMoney(totalPurchases)}</div></div>
+            <div class="stat-card"><div class="label">الفرق (ربح/خسارة)</div><div class="value" style="font-size:18px;color:${totalSales - totalPurchases >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmtMoney(totalSales - totalPurchases)}</div></div>
           </div>
 
           ${lowStock.length ? `
@@ -1371,7 +1536,7 @@
     }
 
     // ============================================
-    // Invoices (مبيعات/مشتريات)
+    // Invoices (مبيعات/مشتريات) - مع تبويبات وتصميم مبسط
     // ============================================
     async function renderInvoices(page, type) {
       page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
@@ -1386,60 +1551,137 @@
         const partnerLabel = type === "purchase" ? "المورد" : "العميل";
 
         page.innerHTML = `
-          <div class="section-card">
-            <h3>${title}</h3>
-            <div class="form-group"><label>المستودع <span class="req">*</span></label>
-              <select id="inv-wh" class="form-control">${whs.map(w => `<option value="${w.id}">${w.name}</option>`).join("")}</select></div>
-            <div class="form-group"><label>${partnerLabel} <span class="opt">(اختياري)</span></label>
-              <select id="inv-partner" class="form-control">
-                <option value="">-- بدون --</option>
-                ${partners.map(p => `<option value="${p.id}">${p.name}</option>`).join("")}
-              </select></div>
-            <div id="inv-items"></div>
-            <button id="inv-add-row" class="btn btn-outline" style="margin-bottom:12px">+ إضافة صنف</button>
-            <div class="form-group"><label>ملاحظات</label>
-              <textarea id="inv-notes" class="form-control"></textarea></div>
-            <button id="inv-save" class="btn btn-primary" style="width:100%">حفظ ${title}</button>
+          <div class="tabs">
+            <button class="tab active" data-tab="new">➕ فاتورة جديدة</button>
+            <button class="tab" data-tab="list">📋 سجل الفواتير</button>
           </div>
-          <div id="inv-list" class="section-card"></div>`;
+          <div id="tab-new" class="tab-content">
+            <div class="section-card">
+              <h3 style="margin-bottom:12px">${title}</h3>
+              <div class="compact-form" style="margin-bottom:12px">
+                <div class="form-group">
+                  <label>${partnerLabel}</label>
+                  <select id="inv-partner" class="form-control">
+                    <option value="">-- بدون --</option>
+                    ${partners.map(p => `<option value="${p.id}">${p.name}</option>`).join("")}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>طريقة الدفع</label>
+                  <select id="inv-payment" class="form-control">
+                    <option value="cash">نقدي</option>
+                    <option value="credit">آجل</option>
+                    <option value="bank">بنك</option>
+                  </select>
+                </div>
+                <button id="inv-add-row" class="btn btn-primary">+ صنف</button>
+              </div>
+              <div id="inv-items"></div>
+              <div class="compact-form" style="margin-top:12px">
+                <div class="form-group" style="flex:2">
+                  <label>ملاحظات</label>
+                  <input id="inv-notes" class="form-control" placeholder="اختياري" />
+                </div>
+                <button id="inv-save" class="btn btn-primary">حفظ الفاتورة</button>
+              </div>
+            </div>
+          </div>
+          <div id="tab-list" class="tab-content hidden">
+            <div class="section-card">
+              <h3>📋 سجل الفواتير</h3>
+              <div id="inv-list"></div>
+            </div>
+          </div>`;
 
+        page.querySelectorAll(".tab").forEach(tab => {
+          tab.onclick = () => {
+            page.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+            page.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+            tab.classList.add("active");
+            $(`#tab-${tab.dataset.tab}`).classList.remove("hidden");
+            if (tab.dataset.tab === "list") loadInvoiceList();
+          };
+        });
+
+        // إضافة صف صنف
         const addRow = () => {
           const div = document.createElement("div");
           div.className = "inv-item-row";
-          div.style.cssText = "display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end";
+          div.style.cssText = "display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap";
           div.innerHTML = `
-            <input class="form-control i-name" placeholder="اسم الصنف" />
-            <input class="form-control i-qty" type="number" min="1" placeholder="الكمية" />
-            <input class="form-control i-price" type="number" min="0" step="0.01" placeholder="السعر" />
-            <button class="btn btn-danger btn-sm i-remove">✕</button>`;
+            <input class="form-control i-name" placeholder="الصنف" style="flex:2;min-width:100px" list="inv-products-list" />
+            <input class="form-control i-qty" type="number" min="1" placeholder="الكمية" style="width:70px" />
+            <input class="form-control i-price" type="number" min="0" step="0.01" placeholder="السعر" style="width:80px" />
+            <select class="form-control i-wh" style="width:120px"><option value="">المستودع</option></select>
+            <button class="btn btn-danger btn-sm i-remove" style="padding:6px 8px">✕</button>`;
+          
+          // تعبئة المستودعات عند إدخال اسم الصنف
+          const nameInput = div.querySelector(".i-name");
+          const whSelect = div.querySelector(".i-wh");
+          
+          nameInput.addEventListener("input", async (e) => {
+            const term = e.target.value.trim();
+            if (term.length < 2) return;
+            const res = await aggregateByName(term);
+            if (res.length > 0) {
+              const product = res[0];
+              div.querySelector(".i-price").value = product.price || 0;
+              // تعبئة المستودعات
+              whSelect.innerHTML = `<option value="">اختر</option>` + product.perWarehouse.map(w => 
+                `<option value="${w.whId}">${w.whName} (${w.qty})</option>`
+              ).join("");
+              // إذا كان هناك مستودع واحد فقط، اختره تلقائياً
+              if (product.perWarehouse.length === 1) {
+                whSelect.value = product.perWarehouse[0].whId;
+              }
+            }
+          });
+
           div.querySelector(".i-remove").onclick = () => div.remove();
           $("#inv-items").appendChild(div);
         };
         addRow();
         $("#inv-add-row").onclick = addRow;
 
+        // إضافة datalist للأصناف الموجودة
+        const allWhs = await getWarehouses();
+        let allProducts = [];
+        for (const w of allWhs) {
+          const items = await getItems(w.id);
+          items.forEach(it => { if (!allProducts.find(p => p.name === it.name)) allProducts.push(it); });
+        }
+        const datalist = document.createElement("datalist");
+        datalist.id = "inv-products-list";
+        allProducts.forEach(p => {
+          const opt = document.createElement("option");
+          opt.value = p.name;
+          datalist.appendChild(opt);
+        });
+        document.body.appendChild(datalist);
+
         $("#inv-save").onclick = async () => {
-          const whId = $("#inv-wh").value;
-          const whName = whs.find(w => w.id === whId).name;
           const partnerId = $("#inv-partner").value;
           const partnerName = partners.find(p => p.id === partnerId)?.name || "";
+          const paymentMethod = $("#inv-payment").value;
           const rows = document.querySelectorAll(".inv-item-row");
           const items = [];
           let total = 0;
-          rows.forEach(r => {
+          for (const r of rows) {
             const name = r.querySelector(".i-name").value.trim();
             const qty = Number(r.querySelector(".i-qty").value);
             const price = Number(r.querySelector(".i-price").value) || 0;
-            if (name && qty > 0) {
-              items.push({ name, quantity: qty, price });
+            const whId = r.querySelector(".i-wh").value;
+            const whName = whId ? allWhs.find(w => w.id === whId)?.name : "";
+            if (name && qty > 0 && whId) {
+              items.push({ name, quantity: qty, price, warehouseId: whId, warehouseName: whName });
               total += qty * price;
             }
-          });
-          if (!items.length) return showToast("أضف صنفاً واحداً على الأقل", "error");
+          }
+          if (!items.length) return showToast("أضف صنفاً واحداً على الأقل مع اختيار المستودع", "error");
           const btn = $("#inv-save");
           try {
             setLoading(btn, true);
-            const invId = await addInvoice(type, whId, whName, partnerId, partnerName, items, $("#inv-notes").value.trim(), total);
+            const invId = await addInvoice(type, partnerId, partnerName, items, paymentMethod, $("#inv-notes").value.trim(), total);
             showToast("تم حفظ الفاتورة", "success");
             const inv = await getInvoice(invId);
             showInvoiceModal(inv);
@@ -1447,42 +1689,46 @@
           } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
         };
 
-        // قائمة الفواتير
-        const invList = await getInvoices(50, type);
-        $("#inv-list").innerHTML = `
-          <h3>📋 آخر الفواتير (${invList.length})</h3>
-          ${invList.length ? `<div style="overflow-x:auto"><table class="table">
-            <thead><tr><th>#</th><th>المستودع</th><th>${partnerLabel}</th><th>الإجمالي</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
-            <tbody>${invList.map(v => `
-              <tr>
-                <td>${v.id.slice(0,6)}</td>
-                <td>${v.warehouseName}</td>
-                <td>${v.partnerName || "-"}</td>
-                <td>${fmtMoney(v.total)}</td>
-                <td>${fmtDate(v.createdAt)}</td>
-                <td><button class="btn btn-outline btn-sm view-inv" data-id="${v.id}">عرض</button></td>
-              </tr>
-            `).join("")}</tbody>
-          </table></div>` : '<div class="empty-state">لا فواتير بعد</div>'}`;
-
-        $("#inv-list").querySelectorAll(".view-inv").forEach(btn => {
-          btn.onclick = async () => {
-            const inv = await getInvoice(btn.dataset.id);
-            showInvoiceModal(inv);
-          };
-        });
+        async function loadInvoiceList() {
+          const invList = await getInvoices(50, type);
+          $("#inv-list").innerHTML = `
+            ${invList.length ? `<div style="overflow-x:auto"><table class="table">
+              <thead><tr><th>الرقم</th><th>${partnerLabel}</th><th>الدفع</th><th>الإجمالي</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+              <tbody>${invList.map(v => `
+                <tr>
+                  <td>${v.invNumber}</td>
+                  <td>${v.partnerName || "-"}</td>
+                  <td><span class="wh-badge">${v.paymentMethod === 'cash' ? 'نقدي' : v.paymentMethod === 'credit' ? 'آجل' : 'بنك'}</span></td>
+                  <td>${fmtMoney(v.total)}</td>
+                  <td>${fmtDate(v.createdAt)}</td>
+                  <td><button class="btn btn-outline btn-sm view-inv" data-id="${v.id}">عرض</button></td>
+                </tr>
+              `).join("")}</tbody>
+            </table></div>` : '<div class="empty-state">لا فواتير بعد</div>'}`;
+          $("#inv-list").querySelectorAll(".view-inv").forEach(btn => {
+            btn.onclick = async () => {
+              const inv = await getInvoice(btn.dataset.id);
+              showInvoiceModal(inv);
+            };
+          });
+        }
       } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
     }
 
     async function showInvoiceModal(inv) {
       if (!inv) return;
+      const partnerPhone = inv.partnerId ? (await getDoc(doc(partnersCol(), inv.partnerId))).data()?.phone : "";
+      const msg = `فاتورة ${inv.type === "purchase" ? "مشتريات" : "مبيعات"} #${inv.invNumber}\nالإجمالي: ${fmtMoney(inv.total)}`;
       openModal("فاتورة", `
         <div id="invoice-view" style="padding:16px;background:#fff;color:#000;border-radius:8px;direction:rtl">
-          <h2 style="text-align:center;color:#2c5f8a">فاتورة ${inv.type === "purchase" ? "مشتريات" : "مبيعات"}</h2>
-          <p style="text-align:center;font-size:12px;color:#666">#${inv.id.slice(0,8)} - ${fmtDate(inv.createdAt)}</p>
+          ${companyData?.logo ? `<img src="${companyData.logo}" style="max-height:60px;display:block;margin:0 auto 8px" />` : ""}
+          <h2 style="text-align:center;color:#2c5f8a">${companyData?.name || ""}</h2>
+          <p style="text-align:center;font-size:12px;color:#666">${companyData?.phone || ""}</p>
           <hr style="margin:12px 0" />
-          <p><b>المستودع:</b> ${inv.warehouseName}</p>
+          <h3 style="text-align:center">فاتورة ${inv.type === "purchase" ? "مشتريات" : "مبيعات"}</h3>
+          <p style="text-align:center;font-size:12px;color:#666">#${inv.invNumber} - ${fmtDate(inv.createdAt)}</p>
           <p><b>${inv.type === "purchase" ? "المورد" : "العميل"}:</b> ${inv.partnerName || "-"}</p>
+          <p><b>طريقة الدفع:</b> ${inv.paymentMethod === 'cash' ? 'نقدي' : inv.paymentMethod === 'credit' ? 'آجل' : 'بنك'}</p>
           <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px">
             <thead><tr style="background:#2c5f8a;color:#fff"><th style="padding:8px">الصنف</th><th style="padding:8px">الكمية</th><th style="padding:8px">السعر</th><th style="padding:8px">الإجمالي</th></tr></thead>
             <tbody>${inv.items.map(i => `
@@ -1492,21 +1738,33 @@
           <p style="text-align:left;font-size:16px"><b>الإجمالي: ${fmtMoney(inv.total)}</b></p>
           ${inv.notes ? `<p><b>ملاحظات:</b> ${inv.notes}</p>` : ""}
         </div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button id="print-inv" class="btn btn-primary" style="flex:1">🖨️ طباعة / PDF</button>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button id="print-inv" class="btn btn-primary" style="flex:1">🖨️ طباعة</button>
+          <button id="pdf-inv" class="btn btn-outline" style="flex:1">📄 PDF</button>
+          ${partnerPhone ? `<button id="wa-inv" class="btn btn-success" style="flex:1">💬 واتساب</button>` : ""}
         </div>`);
       $("#print-inv").onclick = () => printInvoice(inv);
+      $("#pdf-inv").onclick = () => exportInvoicePDF(inv);
+      if (partnerPhone) {
+        $("#wa-inv").onclick = () => {
+          const phone = partnerPhone.replace(/[^0-9]/g, '');
+          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+        };
+      }
     }
 
     function printInvoice(inv) {
       const container = $("#invoice-print-container");
       container.innerHTML = `
         <div style="padding:20px;font-family:'Tajawal',sans-serif">
-          <h2 style="text-align:center;color:#2c5f8a">فاتورة ${inv.type === "purchase" ? "مشتريات" : "مبيعات"}</h2>
-          <p style="text-align:center;font-size:12px;color:#666">#${inv.id.slice(0,8)} - ${fmtDate(inv.createdAt)}</p>
+          ${companyData?.logo ? `<img src="${companyData.logo}" style="max-height:80px;display:block;margin:0 auto 8px" />` : ""}
+          <h2 style="text-align:center;color:#2c5f8a">${companyData?.name || ""}</h2>
+          <p style="text-align:center;font-size:12px;color:#666">${companyData?.phone || ""}</p>
           <hr style="margin:12px 0" />
-          <p><b>المستودع:</b> ${inv.warehouseName}</p>
+          <h3 style="text-align:center">فاتورة ${inv.type === "purchase" ? "مشتريات" : "مبيعات"}</h3>
+          <p style="text-align:center;font-size:12px;color:#666">#${inv.invNumber} - ${fmtDate(inv.createdAt)}</p>
           <p><b>${inv.type === "purchase" ? "المورد" : "العميل"}:</b> ${inv.partnerName || "-"}</p>
+          <p><b>طريقة الدفع:</b> ${inv.paymentMethod === 'cash' ? 'نقدي' : inv.paymentMethod === 'credit' ? 'آجل' : 'بنك'}</p>
           <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px">
             <thead><tr style="background:#2c5f8a;color:#fff"><th style="padding:8px;border:1px solid #ccc">الصنف</th><th style="padding:8px;border:1px solid #ccc">الكمية</th><th style="padding:8px;border:1px solid #ccc">السعر</th><th style="padding:8px;border:1px solid #ccc">الإجمالي</th></tr></thead>
             <tbody>${inv.items.map(i => `
@@ -1519,6 +1777,43 @@
       window.print();
     }
 
+    async function exportInvoicePDF(inv) {
+      showToast("جارٍ تجهيز PDF...", "success");
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "mm", "a4");
+      const wrap = document.createElement("div");
+      wrap.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:800px;background:#fff;padding:24px;font-family:'Tajawal',sans-serif;direction:rtl;";
+      wrap.innerHTML = `
+        ${companyData?.logo ? `<img src="${companyData.logo}" style="max-height:60px;display:block;margin:0 auto 8px" />` : ""}
+        <h2 style="text-align:center;color:#2c5f8a">${companyData?.name || ""}</h2>
+        <p style="text-align:center;font-size:12px;color:#666">${companyData?.phone || ""}</p>
+        <hr style="margin:12px 0" />
+        <h3 style="text-align:center">فاتورة ${inv.type === "purchase" ? "مشتريات" : "مبيعات"}</h3>
+        <p style="text-align:center;font-size:12px;color:#666">#${inv.invNumber} - ${fmtDate(inv.createdAt)}</p>
+        <p><b>${inv.type === "purchase" ? "المورد" : "العميل"}:</b> ${inv.partnerName || "-"}</p>
+        <p><b>طريقة الدفع:</b> ${inv.paymentMethod === 'cash' ? 'نقدي' : inv.paymentMethod === 'credit' ? 'آجل' : 'بنك'}</p>
+        <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px">
+          <thead><tr style="background:#2c5f8a;color:#fff"><th style="padding:8px;border:1px solid #ccc">الصنف</th><th style="padding:8px;border:1px solid #ccc">الكمية</th><th style="padding:8px;border:1px solid #ccc">السعر</th><th style="padding:8px;border:1px solid #ccc">الإجمالي</th></tr></thead>
+          <tbody>${inv.items.map(i => `
+            <tr><td style="padding:6px;border:1px solid #ccc">${i.name}</td><td style="padding:6px;border:1px solid #ccc">${i.quantity}</td><td style="padding:6px;border:1px solid #ccc">${fmtMoney(i.price)}</td><td style="padding:6px;border:1px solid #ccc">${fmtMoney(i.price * i.quantity)}</td></tr>
+          `).join("")}</tbody>
+        </table>
+        <p style="text-align:left;font-size:16px"><b>الإجمالي: ${fmtMoney(inv.total)}</b></p>
+        ${inv.notes ? `<p><b>ملاحظات:</b> ${inv.notes}</p>` : ""}`;
+      document.body.appendChild(wrap);
+      try {
+        const canvas = await html2canvas(wrap, { scale: 2, backgroundColor: "#fff", useCORS: true });
+        const imgData = canvas.toDataURL("image/png");
+        const pdfW = 210;
+        const pdfH = (canvas.height * pdfW) / canvas.width;
+        if (pdfH <= 297) doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+        else { let y=0; let rem=pdfH; while(rem>0){ doc.addImage(imgData,"PNG",0,-y,pdfW,pdfH); rem-=297; y+=297; if(rem>0)doc.addPage(); } }
+        doc.save(`invoice-${inv.invNumber}.pdf`);
+        showToast("تم تصدير PDF", "success");
+      } catch (e) { showToast("فشل PDF: " + e.message, "error"); }
+      finally { wrap.remove(); }
+    }
+
     // ============================================
     // Manual Vouchers (سندات صرف/قبض/قيد)
     // ============================================
@@ -1529,51 +1824,79 @@
         const vouchers = await getManualVouchers(50);
 
         page.innerHTML = `
-          <div class="section-card">
-            <h3>🧾 سند جديد</h3>
-            <div class="form-group"><label>نوع السند</label>
-              <select id="v-type" class="form-control">
-                <option value="receipt">سند قبض</option>
-                <option value="payment">سند صرف</option>
-                <option value="journal">سند قيد</option>
-              </select></div>
-            <div class="form-group"><label>المبلغ <span class="req">*</span></label>
-              <input id="v-amount" type="number" min="0" step="0.01" class="form-control" /></div>
-            <div class="form-group"><label>الشريك</label>
-              <select id="v-partner" class="form-control">
-                <option value="">-- بدون --</option>
-                ${partners.map(p => `<option value="${p.name}">${p.name} (${p.type === 'customer' ? 'عميل' : p.type === 'supplier' ? 'مورد' : 'مندوب'})</option>`).join("")}
-              </select></div>
-            <div class="form-group"><label>ملاحظات</label>
-              <textarea id="v-notes" class="form-control"></textarea></div>
-            <button id="v-save" class="btn btn-primary" style="width:100%">حفظ السند</button>
+          <div class="tabs">
+            <button class="tab active" data-tab="new">➕ سند جديد</button>
+            <button class="tab" data-tab="list">📋 السجل</button>
           </div>
-          <div class="section-card">
-            <h3>📋 السندات (${vouchers.length})</h3>
-            ${vouchers.length ? `<div style="overflow-x:auto"><table class="table">
-              <thead><tr><th>النوع</th><th>المبلغ</th><th>الشريك</th><th>ملاحظات</th><th>التاريخ</th></tr></thead>
-              <tbody>${vouchers.map(v => `
-                <tr>
-                  <td><span class="low-badge" style="background:${v.type === 'receipt' ? 'var(--success)' : v.type === 'payment' ? 'var(--danger)' : 'var(--primary)'}">${v.type === 'receipt' ? 'قبض' : v.type === 'payment' ? 'صرف' : 'قيد'}</span></td>
-                  <td>${fmtMoney(v.amount)}</td>
-                  <td>${v.partnerName || "-"}</td>
-                  <td>${v.notes || "-"}</td>
-                  <td>${fmtDate(v.createdAt)}</td>
-                </tr>
-              `).join("")}</tbody>
-            </table></div>` : '<div class="empty-state">لا سندات بعد</div>'}
+          <div id="tab-new" class="tab-content">
+            <div class="section-card">
+              <h3 style="margin-bottom:12px">🧾 سند جديد</h3>
+              <div class="compact-form" style="margin-bottom:12px">
+                <div class="form-group">
+                  <label>النوع</label>
+                  <select id="v-type" class="form-control">
+                    <option value="receipt">سند قبض</option>
+                    <option value="payment">سند صرف</option>
+                    <option value="journal">سند قيد</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>المبلغ</label>
+                  <input id="v-amount" type="number" min="0" step="0.01" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label>الشريك</label>
+                  <select id="v-partner" class="form-control">
+                    <option value="">-- بدون --</option>
+                    ${partners.map(p => `<option value="${p.id}">${p.name}</option>`).join("")}
+                  </select>
+                </div>
+                <button id="v-save" class="btn btn-primary">حفظ</button>
+              </div>
+              <div class="form-group">
+                <label>ملاحظات</label>
+                <input id="v-notes" class="form-control" placeholder="اختياري" />
+              </div>
+            </div>
+          </div>
+          <div id="tab-list" class="tab-content hidden">
+            <div class="section-card">
+              <h3>📋 السندات (${vouchers.length})</h3>
+              ${vouchers.length ? `<div style="overflow-x:auto"><table class="table">
+                <thead><tr><th>النوع</th><th>المبلغ</th><th>الشريك</th><th>ملاحظات</th><th>التاريخ</th></tr></thead>
+                <tbody>${vouchers.map(v => `
+                  <tr>
+                    <td><span class="low-badge" style="background:${v.type === 'receipt' ? 'var(--success)' : v.type === 'payment' ? 'var(--danger)' : 'var(--primary)'}">${v.type === 'receipt' ? 'قبض' : v.type === 'payment' ? 'صرف' : 'قيد'}</span></td>
+                    <td>${fmtMoney(v.amount)}</td>
+                    <td>${v.partnerName || "-"}</td>
+                    <td>${v.notes || "-"}</td>
+                    <td>${fmtDate(v.createdAt)}</td>
+                  </tr>
+                `).join("")}</tbody>
+              </table></div>` : '<div class="empty-state">لا سندات بعد</div>'}
+            </div>
           </div>`;
+
+        page.querySelectorAll(".tab").forEach(tab => {
+          tab.onclick = () => {
+            page.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+            page.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+            tab.classList.add("active");
+            $(`#tab-${tab.dataset.tab}`).classList.remove("hidden");
+          };
+        });
 
         $("#v-save").onclick = async () => {
           const type = $("#v-type").value;
           const amount = $("#v-amount").value;
-          const partner = $("#v-partner").value;
+          const partnerId = $("#v-partner").value;
+          const partnerName = partners.find(p => p.id === partnerId)?.name || "";
           const notes = $("#v-notes").value.trim();
           if (!amount || Number(amount) <= 0) return showToast("أدخل مبلغاً صحيحاً", "error");
           const btn = $("#v-save");
           try {
             setLoading(btn, true);
-            await addVoucher(type, amount, partner, notes);
+            await addVoucher(type, amount, partnerId, partnerName, notes);
             showToast("تم حفظ السند", "success");
             renderVouchers(page);
           } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
@@ -1595,13 +1918,15 @@
               <button id="add-partner-btn" class="btn btn-primary">+ شريك جديد</button>
             </div>
             ${partners.length ? `<div style="overflow-x:auto"><table class="table">
-              <thead><tr><th>الاسم</th><th>النوع</th><th>الهاتف</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
+              <thead><tr><th>الاسم</th><th>النوع</th><th>الهاتف</th><th>الرصيد</th><th>إجراءات</th></tr></thead>
               <tbody>${partners.map(p => `
                 <tr>
                   <td><b>${p.name}</b></td>
                   <td><span class="wh-badge">${p.type === 'customer' ? 'عميل' : p.type === 'supplier' ? 'مورد' : 'مندوب'}</span></td>
                   <td>${p.phone || "-"}</td>
-                  <td>${p.notes || "-"}</td>
+                  <td style="color:${Number(p.balance) >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                    ${Number(p.balance) >= 0 ? 'دائن' : 'مدين'} : ${fmtMoney(Math.abs(Number(p.balance) || 0))}
+                  </td>
                   <td><button class="btn btn-danger btn-sm del-partner" data-id="${p.id}" data-name="${p.name}">حذف</button></td>
                 </tr>
               `).join("")}</tbody>
@@ -1647,7 +1972,137 @@
     }
 
     // ============================================
-    // Export
+    // Reports (التقارير) - مع تصدير PDF
+    // ============================================
+    async function renderReports(page) {
+      page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
+      try {
+        const invoices = await getInvoices(1000);
+        const partners = await getPartners();
+        
+        const totalSales = invoices.filter(v => v.type === "sale").reduce((a, b) => a + (Number(b.total) || 0), 0);
+        const totalPurchases = invoices.filter(v => v.type === "purchase").reduce((a, b) => a + (Number(b.total) || 0), 0);
+        const diff = totalSales - totalPurchases;
+
+        page.innerHTML = `
+          <div class="tabs">
+            <button class="tab active" data-tab="summary">📊 ملخص</button>
+            <button class="tab" data-tab="invoices">📋 الفواتير</button>
+            <button class="tab" data-tab="partners">📒 كشف الحسابات</button>
+          </div>
+          <div id="tab-summary" class="tab-content">
+            <div class="stats-grid">
+              <div class="stat-card success"><div class="label">إجمالي المبيعات</div><div class="value">${fmtMoney(totalSales)}</div></div>
+              <div class="stat-card warning"><div class="label">إجمالي المشتريات</div><div class="value">${fmtMoney(totalPurchases)}</div></div>
+              <div class="stat-card ${diff >= 0 ? 'success' : 'warning'}"><div class="label">الفرق (ربح/خسارة)</div><div class="value" style="color:${diff >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmtMoney(diff)}</div></div>
+            </div>
+          </div>
+          <div id="tab-invoices" class="tab-content hidden">
+            <div class="section-card">
+              <h3>📊 تقرير مفصل بالفواتير</h3>
+              <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+                <input id="rep-search" class="form-control" style="flex:1;min-width:150px" placeholder="ابحث برقم، اسم، أو تاريخ..." />
+                <button id="rep-export-pdf" class="btn btn-outline">📄 PDF</button>
+              </div>
+              <div style="overflow-x:auto">
+                <table class="table">
+                  <thead><tr><th>النوع</th><th>الرقم</th><th>الشريك</th><th>الدفع</th><th>الإجمالي</th><th>التاريخ</th></tr></thead>
+                  <tbody id="rep-body">
+                    ${invoices.map(v => `
+                      <tr data-search="${v.invNumber} ${v.partnerName} ${fmtDate(v.createdAt)}">
+                        <td><span class="low-badge" style="background:${v.type === 'purchase' ? 'var(--warning)' : 'var(--success)'}">${v.type === 'purchase' ? 'شراء' : 'بيع'}</span></td>
+                        <td>${v.invNumber}</td>
+                        <td>${v.partnerName || "-"}</td>
+                        <td>${v.paymentMethod === 'cash' ? 'نقدي' : v.paymentMethod === 'credit' ? 'آجل' : 'بنك'}</td>
+                        <td>${fmtMoney(v.total)}</td>
+                        <td>${fmtDate(v.createdAt)}</td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div id="tab-partners" class="tab-content hidden">
+            <div class="section-card">
+              <h3>📒 كشف حساب الشركاء</h3>
+              ${partners.length ? `<div style="overflow-x:auto"><table class="table">
+                <thead><tr><th>الاسم</th><th>النوع</th><th>الرصيد</th><th>الحالة</th></tr></thead>
+                <tbody>${partners.map(p => `
+                  <tr>
+                    <td><b>${p.name}</b></td>
+                    <td>${p.type === 'customer' ? 'عميل' : p.type === 'supplier' ? 'مورد' : 'مندوب'}</td>
+                    <td>${fmtMoney(Math.abs(Number(p.balance) || 0))}</td>
+                    <td style="color:${Number(p.balance) >= 0 ? 'var(--success)' : 'var(--danger)'}">${Number(p.balance) >= 0 ? 'دائن (له)' : 'مدين (عليه)'}</td>
+                  </tr>
+                `).join("")}</tbody>
+              </table></div>` : '<div class="empty-state">لا شركاء</div>'}
+            </div>
+          </div>`;
+
+        page.querySelectorAll(".tab").forEach(tab => {
+          tab.onclick = () => {
+            page.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+            page.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+            tab.classList.add("active");
+            $(`#tab-${tab.dataset.tab}`).classList.remove("hidden");
+          };
+        });
+
+        $("#rep-search")?.addEventListener("input", (e) => {
+          const term = e.target.value.trim().toLowerCase();
+          document.querySelectorAll("#rep-body tr").forEach(tr => {
+            tr.style.display = tr.dataset.search.toLowerCase().includes(term) ? "" : "none";
+          });
+        });
+
+        $("#rep-export-pdf")?.addEventListener("click", () => exportReportsPDF(invoices));
+      } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
+    }
+
+    async function exportReportsPDF(invoices) {
+      showToast("جارٍ تجهيز PDF...", "success");
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "mm", "a4");
+      const wrap = document.createElement("div");
+      wrap.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:800px;background:#fff;padding:24px;font-family:'Tajawal',sans-serif;direction:rtl;";
+      wrap.innerHTML = `
+        <h2 style="text-align:center;color:#2c5f8a">تقرير الفواتير</h2>
+        <p style="text-align:center;font-size:12px;color:#666">${new Date().toLocaleString("ar-EG")}</p>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:20px">
+          <thead><tr style="background:#2c5f8a;color:#fff">
+            <th style="padding:8px;border:1px solid #ccc">النوع</th>
+            <th style="padding:8px;border:1px solid #ccc">الرقم</th>
+            <th style="padding:8px;border:1px solid #ccc">الشريك</th>
+            <th style="padding:8px;border:1px solid #ccc">الإجمالي</th>
+            <th style="padding:8px;border:1px solid #ccc">التاريخ</th>
+          </tr></thead>
+          <tbody>${invoices.map(v => `
+            <tr>
+              <td style="padding:6px;border:1px solid #ccc">${v.type === 'sale' ? 'بيع' : 'شراء'}</td>
+              <td style="padding:6px;border:1px solid #ccc">${v.invNumber}</td>
+              <td style="padding:6px;border:1px solid #ccc">${v.partnerName || "-"}</td>
+              <td style="padding:6px;border:1px solid #ccc">${fmtMoney(v.total)}</td>
+              <td style="padding:6px;border:1px solid #ccc">${fmtDate(v.createdAt)}</td>
+            </tr>
+          `).join("")}</tbody>
+        </table>`;
+      document.body.appendChild(wrap);
+      try {
+        const canvas = await html2canvas(wrap, { scale: 2, backgroundColor: "#fff", useCORS: true });
+        const imgData = canvas.toDataURL("image/png");
+        const pdfW = 210;
+        const pdfH = (canvas.height * pdfW) / canvas.width;
+        if (pdfH <= 297) doc.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+        else { let y=0; let rem=pdfH; while(rem>0){ doc.addImage(imgData,"PNG",0,-y,pdfW,pdfH); rem-=297; y+=297; if(rem>0)doc.addPage(); } }
+        doc.save(`reports-${new Date().toISOString().slice(0,10)}.pdf`);
+        showToast("تم تصدير PDF", "success");
+      } catch (e) { showToast("فشل PDF: " + e.message, "error"); }
+      finally { wrap.remove(); }
+    }
+
+    // ============================================
+    // Export Warehouse
     // ============================================
     async function exportWarehousePDF(wh, items) {
       showToast("جارٍ تجهيز PDF...", "success");
@@ -1744,102 +2199,111 @@
     }
 
     // ============================================
-    // Transfer
+    // Transfer (نقل البضاعة) - خطوات
     // ============================================
-    let transferState = { fromWhId: null, toWhId: null, itemName: null, items: [], warehouses: [] };
+    let transferState = { step: 1, fromWhId: null, toWhId: null, itemName: null, items: [], warehouses: [] };
 
     async function renderTransfer(page) {
       page.innerHTML = `<div class="skeleton skeleton-card"></div>`;
       try {
         transferState.warehouses = await getWarehouses();
-        transferState.fromWhId = null; transferState.toWhId = null;
-        transferState.itemName = null; transferState.items = [];
         if (transferState.warehouses.length < 2) {
           page.innerHTML = `<div class="section-card"><h3>🔄 نقل البضاعة</h3><div class="empty-state"><div class="icon">🏬</div>تحتاج مستودعين على الأقل<br><br><button class="btn btn-primary" onclick="document.querySelector('.nav-link[data-page=\\'warehouses\\']').click()">إدارة المستودعات ←</button></div></div>`;
           return;
         }
-        page.innerHTML = `
-          <div class="section-card">
-            <h3>🔄 نقل البضاعة</h3>
-            <div class="form-group"><label>1. المصدر <span class="req">*</span></label>
-              <div class="searchable"><input id="from-wh-search" class="form-control" placeholder="ابحث باسم المستودع..." /><div id="from-wh-list" class="searchable-list"></div></div></div>
-            <div class="form-group"><label>2. الصنف <span class="req">*</span></label>
-              <div class="searchable"><input id="item-search" class="form-control" placeholder="اختر المصدر أولاً" disabled /><div id="item-list" class="searchable-list"></div></div></div>
-            <div class="form-group"><label>3. الكمية <span class="req">*</span></label>
-              <input id="tr-qty" type="number" min="1" class="form-control" /></div>
-            <div class="form-group"><label>4. المستلم <span class="req">*</span></label>
-              <div class="searchable"><input id="to-wh-search" class="form-control" placeholder="ابحث باسم المستودع..." /><div id="to-wh-list" class="searchable-list"></div></div></div>
-            <button id="tr-btn" class="btn btn-primary" style="width:100%">تنفيذ النقل</button>
-          </div>`;
-        setupWarehouseSearch("from-wh-search", "from-wh-list", (wh) => {
-          transferState.fromWhId = wh ? wh.id : null;
-          transferState.itemName = null;
-          $("#item-search").value = ""; $("#item-search").disabled = !wh;
-          loadItemsForSource(wh);
-        });
-        setupWarehouseSearch("to-wh-search", "to-wh-list", (wh) => { transferState.toWhId = wh ? wh.id : null; });
-        $("#tr-btn").onclick = async () => {
-          const qty = $("#tr-qty").value.trim();
-          if (!transferState.fromWhId) return showToast("اختر المصدر", "error");
-          if (!transferState.itemName) return showToast("اختر الصنف", "error");
-          if (!qty || Number(qty) <= 0) return showToast("أدخل كمية", "error");
-          if (!transferState.toWhId) return showToast("اختر المستلم", "error");
-          if (transferState.fromWhId === transferState.toWhId) return showToast("نفس المستودع!", "error");
-          const btn = $("#tr-btn");
-          try {
-            setLoading(btn, true, "جارٍ النقل...");
-            await transferStock({ fromWhId: transferState.fromWhId, toWhId: transferState.toWhId, itemName: transferState.itemName, qty });
-            showToast("تم النقل بنجاح", "success");
-            renderTransfer($("#page-transfer"));
-          } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
-        };
+        renderTransferStep(page);
       } catch (e) { page.innerHTML = `<div class="empty-state">خطأ: ${e.message}</div>`; }
     }
 
-    function setupWarehouseSearch(inputId, listId, onSelect) {
-      const input = $("#" + inputId); const list = $("#" + listId);
-      if (!input || !list) return;
-      const render = (filterText = "") => {
-        const filtered = transferState.warehouses.filter(w => w.name.toLowerCase().includes(filterText.toLowerCase()));
-        list.innerHTML = filtered.length ? filtered.map(w => `<div class="searchable-item" data-id="${w.id}">${w.name}</div>`).join("")
-          : `<div class="searchable-item" style="cursor:default;color:var(--muted)">لا نتائج</div>`;
-        list.classList.add("open");
-        list.querySelectorAll(".searchable-item[data-id]").forEach(item => {
-          item.onclick = () => {
-            const wh = transferState.warehouses.find(w => w.id === item.dataset.id);
-            input.value = wh.name; list.classList.remove("open"); onSelect(wh);
+    function renderTransferStep(page) {
+      if (transferState.step === 1) {
+        page.innerHTML = `
+          <div class="section-card">
+            <h3>🔄 نقل البضاعة - الخطوة 1: اختر المستودع المصدر</h3>
+            <div class="wh-grid" id="src-grid"></div>
+          </div>`;
+        const grid = $("#src-grid");
+        transferState.warehouses.forEach(wh => {
+          const card = el("div", "wh-card", `
+            <div class="icon">📦</div>
+            <h4>${wh.name}</h4>
+            <button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%">اختيار</button>`);
+          card.querySelector("button").onclick = async () => {
+            transferState.fromWhId = wh.id;
+            transferState.items = (await getItems(wh.id)).filter(i => Number(i.quantity) > 0);
+            transferState.step = 2;
+            renderTransferStep(page);
           };
+          grid.appendChild(card);
         });
-      };
-      input.addEventListener("focus", () => render(input.value));
-      input.addEventListener("input", () => { render(input.value); onSelect(null); });
-      input.addEventListener("blur", () => setTimeout(() => list.classList.remove("open"), 200));
+      } else if (transferState.step === 2) {
+        page.innerHTML = `
+          <div class="section-card">
+            <h3>🔄 نقل البضاعة - الخطوة 2: اختر الصنف</h3>
+            <div style="margin-bottom:12px">
+              <input id="tr-item-search" class="form-control" placeholder="ابحث باسم الصنف..." />
+            </div>
+            <div id="item-grid" class="wh-grid"></div>
+            <button id="back-step1" class="btn btn-outline" style="margin-top:12px">← رجوع</button>
+          </div>`;
+        const grid = $("#item-grid");
+        const renderItems = (filter = "") => {
+          grid.innerHTML = "";
+          const filtered = transferState.items.filter(i => i.name.toLowerCase().includes(filter.toLowerCase()));
+          if (!filtered.length) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">لا أصناف</div>`;
+            return;
+          }
+          filtered.forEach(it => {
+            const card = el("div", "wh-card", `
+              <h4>${it.name}</h4>
+              <p>المتوفر: ${it.quantity}</p>
+              <button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%">اختيار</button>`);
+            card.querySelector("button").onclick = () => {
+              transferState.itemName = it.name;
+              transferState.step = 3;
+              renderTransferStep(page);
+            };
+            grid.appendChild(card);
+          });
+        };
+        renderItems();
+        $("#tr-item-search").addEventListener("input", (e) => renderItems(e.target.value));
+        $("#back-step1").onclick = () => { transferState.step = 1; renderTransferStep(page); };
+      } else if (transferState.step === 3) {
+        page.innerHTML = `
+          <div class="section-card">
+            <h3>🔄 نقل البضاعة - الخطوة 3: اختر الكمية والمستودع المستلم</h3>
+            <p>الصنف: <b>${transferState.itemName}</b></p>
+            <div class="form-group"><label>الكمية <span class="req">*</span></label>
+              <input id="tr-qty" type="number" min="1" class="form-control" /></div>
+            <div class="form-group"><label>المستودع المستلم <span class="req">*</span></label>
+              <select id="tr-to-wh" class="form-control">
+                <option value="">-- اختر --</option>
+                ${transferState.warehouses.filter(w => w.id !== transferState.fromWhId).map(w => `<option value="${w.id}">${w.name}</option>`).join("")}
+              </select></div>
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <button id="tr-confirm" class="btn btn-primary" style="flex:1">تأكيد النقل</button>
+              <button id="back-step2" class="btn btn-outline">← رجوع</button>
+            </div>
+          </div>`;
+        $("#back-step2").onclick = () => { transferState.step = 2; renderTransferStep(page); };
+        $("#tr-confirm").onclick = async () => {
+          const qty = $("#tr-qty").value.trim();
+          const toWhId = $("#tr-to-wh").value;
+          if (!qty || Number(qty) <= 0) return showToast("أدخل كمية صحيحة", "error");
+          if (!toWhId) return showToast("اختر المستودع المستلم", "error");
+          const btn = $("#tr-confirm");
+          try {
+            setLoading(btn, true, "جارٍ النقل...");
+            await transferStock({ fromWhId: transferState.fromWhId, toWhId, itemName: transferState.itemName, qty });
+            showToast("تم النقل بنجاح", "success");
+            transferState.step = 1;
+            renderTransferStep(page);
+          } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+        };
+      }
     }
-
-    async function loadItemsForSource(wh) {
-      const itemInput = $("#item-search"); const itemList = $("#item-list");
-      if (!wh) { itemInput.value = ""; itemInput.disabled = true; itemInput.placeholder = "اختر المصدر أولاً"; itemList.innerHTML = ""; return; }
-      itemInput.disabled = false; itemInput.placeholder = "ابحث باسم الصنف...";
-      try {
-        transferState.items = await getItems(wh.id);
-        renderItemList(transferState.items.filter(i => Number(i.quantity) > 0));
-      } catch (e) { showToast("فشل تحميل الأصناف", "error"); }
-    }
-
-    function renderItemList(items) {
-      const itemInput = $("#item-search"); const itemList = $("#item-list");
-      const term = itemInput.value.trim().toLowerCase();
-      const filtered = items.filter(i => i.name.toLowerCase().includes(term) || (i.barcode && i.barcode === term));
-      itemList.innerHTML = filtered.length ? filtered.map(i => `<div class="searchable-item" data-name="${i.name}">${i.name}<div class="meta">المتوفر: ${i.quantity}${i.barcode ? " • باركود: " + i.barcode : ""}</div></div>`).join("")
-        : `<div class="searchable-item" style="cursor:default;color:var(--muted)">لا نتائج</div>`;
-      itemList.classList.add("open");
-      itemList.querySelectorAll(".searchable-item[data-name]").forEach(el => {
-        el.onclick = () => { transferState.itemName = el.dataset.name; itemInput.value = el.dataset.name; itemList.classList.remove("open"); };
-      });
-    }
-    document.addEventListener("input", (e) => { if (e.target.id === "item-search" && transferState.fromWhId) renderItemList(transferState.items.filter(i => Number(i.quantity) > 0)); });
-    document.addEventListener("focusin", (e) => { if (e.target.id === "item-search" && transferState.fromWhId) renderItemList(transferState.items.filter(i => Number(i.quantity) > 0)); });
-    document.addEventListener("focusout", (e) => { if (e.target.id === "item-search") setTimeout(() => $("#item-list")?.classList.remove("open"), 200); });
 
     // ============================================
     // Logs
@@ -1922,6 +2386,7 @@
       const user = currentUser;
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       const layout = localStorage.getItem("layout") || "top";
+      const currency = localStorage.getItem("currency") || "SAR";
       page.innerHTML = `
         <div class="section-card">
           <h3>⚙️ الإعدادات</h3>
@@ -1938,6 +2403,17 @@
             <div class="form-group"><label>الاسم</label>
               <input id="set-name" class="form-control" value="${user.displayName || ""}" /></div>
             <button id="save-profile-btn" class="btn btn-primary">حفظ الاسم</button>
+          </div>
+
+          <div class="settings-group">
+            <h4>🏢 بيانات الشركة</h4>
+            <div class="form-group"><label>اسم الشركة</label>
+              <input id="set-company-name" class="form-control" value="${companyData?.name || ""}" /></div>
+            <div class="form-group"><label>رقم الهاتف</label>
+              <input id="set-company-phone" class="form-control" value="${companyData?.phone || ""}" /></div>
+            <div class="form-group"><label>الشعار (رفع ملف)</label>
+              <input type="file" id="set-company-logo" class="form-control" accept="image/*" /></div>
+            <button id="save-company-btn" class="btn btn-primary">حفظ بيانات الشركة</button>
           </div>
 
           <div class="settings-group">
@@ -1972,6 +2448,17 @@
           </div>
 
           <div class="settings-group">
+            <h4>💱 العملة</h4>
+            <div class="form-group"><label>اختر العملة</label>
+              <select id="set-currency" class="form-control">
+                <option value="SAR" ${currency === 'SAR' ? 'selected' : ''}>ريال سعودي (ر.س)</option>
+                <option value="EGP" ${currency === 'EGP' ? 'selected' : ''}>جنيه مصري (ج.م)</option>
+                <option value="USD" ${currency === 'USD' ? 'selected' : ''}>دولار أمريكي ($)</option>
+              </select></div>
+            <button id="save-currency-btn" class="btn btn-primary">حفظ العملة</button>
+          </div>
+
+          <div class="settings-group">
             <h4>📖 المساعدة</h4>
             <div class="setting-row">
               <div><div class="label">إعادة الجولة التعريفية</div><div class="desc">عرض شرح الميزات مرة أخرى</div></div>
@@ -1996,6 +2483,30 @@
           showToast("تم الحفظ", "success");
           setLoading(btn, false);
           renderSettings(page);
+        } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
+      };
+
+      $("#save-company-btn").onclick = async () => {
+        const name = $("#set-company-name").value.trim();
+        const phone = $("#set-company-phone").value.trim();
+        const fileInput = $("#set-company-logo");
+        const file = fileInput.files[0];
+        if (!name || !phone) return showToast("أدخل اسم الشركة ورقم الهاتف", "error");
+        const btn = $("#save-company-btn");
+        try {
+          setLoading(btn, true);
+          let logoBase64 = companyData?.logo || "";
+          if (file) {
+            logoBase64 = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+          }
+          await saveCompanyData({ name, phone, logo: logoBase64 });
+          showToast("تم حفظ بيانات الشركة", "success");
+          setLoading(btn, false);
         } catch (e) { showToast("فشل: " + e.message, "error"); setLoading(btn, false); }
       };
 
@@ -2038,6 +2549,14 @@
         applyLayout("side");
         $("#layout-side-btn").classList.add("on");
         $("#layout-top-btn").classList.remove("on");
+      };
+
+      $("#save-currency-btn").onclick = () => {
+        const currency = $("#set-currency").value;
+        localStorage.setItem("currency", currency);
+        currentCurrency = currency;
+        showToast("تم الحفظ، سيتم تحديث الصفحة", "success");
+        setTimeout(() => location.reload(), 1000);
       };
 
       $("#restart-tour-btn").onclick = () => {
